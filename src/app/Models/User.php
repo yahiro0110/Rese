@@ -41,4 +41,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * ユーザーに関連する役割のコレクションを取得します。
+     *
+     * このメソッドは多対多のリレーションシップを表し、関連するRoleモデルのインスタンスのコレクションを返します。
+     * ユーザーと役割は `role_user` 中間テーブルを介して関連付けられています。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'role_user');
+    }
 }
