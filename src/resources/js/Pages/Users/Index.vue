@@ -1,10 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
-// import Pagination from '@/Components/Pagination.vue';
+import Pagination from '@/Components/Pagination.vue';
 
 defineProps({
-    users: Array,
+    users: Object,
 });
 </script>
 
@@ -41,7 +41,7 @@ defineProps({
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="user in users" :key="user.id">
+                                            <tr v-for="user in users.data" :key="user.id">
                                                 <td class="px-4 border-b-2 border-gray-200 py-3">{{ user.id }}</td>
                                                 <td class="px-4 border-b-2 border-gray-200 py-3">{{ user.name }}</td>
                                                 <td class="px-4 border-b-2 border-gray-200 py-3">{{ user.email }}</td>
@@ -55,7 +55,7 @@ defineProps({
                                         </tbody>
                                     </table>
                                 </div>
-                                <!-- <Pagination class="flex justify-center mt-6" :links="users.links"></Pagination> -->
+                                <Pagination class="flex justify-center mt-6" :links="users.links"></Pagination>
                             </div>
                         </section>
                     </div>

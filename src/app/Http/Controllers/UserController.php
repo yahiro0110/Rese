@@ -18,7 +18,7 @@ class UserController extends Controller
         return Inertia::render(
             'Users/Index',
             [
-                'users' => User::select('id', 'name', 'email')->get(),
+                'users' => User::select('id', 'name', 'email')->paginate(10),
             ]
         );
     }
