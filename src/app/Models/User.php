@@ -54,4 +54,17 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class, 'role_user');
     }
+
+    /**
+     * ユーザーに関連するロールのIDと名前のみを取得するローカルスコープ
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithRolesOnlyIdAndName($query)
+    {
+        return $query->with(['roles' => function ($query) {
+            $query->select('id', 'name');
+        }]);
+    }
 }
