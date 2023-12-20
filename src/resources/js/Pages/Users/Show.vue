@@ -9,7 +9,7 @@ defineProps({
     user: Object,
 });
 
-const deleteItem = (id) => {
+const deleteUser = (id) => {
     Inertia.delete(route('users.destroy', { user: id }), {
         onBefore: () => confirm('削除しますか？'),
     });
@@ -57,7 +57,7 @@ const deleteItem = (id) => {
                                                     class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg mx-2">
                                                 編集する
                                                 </Link>
-                                                <button @click="deleteItem(user.id)"
+                                                <button @click="deleteUser(user.id)"
                                                     class="text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg mx-2">
                                                     削除する
                                                 </button>

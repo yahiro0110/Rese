@@ -111,11 +111,23 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        //
+        try {
+            $user->delete();
+
+            return to_route('users.index')->with([
+                'message' => 'ユーザを削除しました。',
+                'status' => 'danger',
+            ]);
+        } catch (\Exception $e) {
+            return to_route('users.index')->with([
+                'message' => 'ユーザの削除に失敗しました。',
+                'status' => 'warning',
+            ]);
+        }
     }
 }
