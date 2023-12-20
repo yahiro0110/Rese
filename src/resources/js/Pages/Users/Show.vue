@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
 // import { nl2br } from '@/common';
 import { Inertia } from '@inertiajs/inertia';
+import FlashMessage from '@/Components/FlashMessage.vue';
 
 defineProps({
     user: Object,
@@ -23,10 +24,11 @@ const deleteItem = (id) => {
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ user.name }}さんの情報</h2>
         </template>
 
-        <div class="py-12">
+        <div :class="{ 'animate-shake-horizontal': $page.props.flash.status === 'warning' }" class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
+                        <FlashMessage />
                         <section class="text-gray-600 body-font relative">
                             <div class="container px-5 py-8 mx-auto">
                                 <div class="lg:w-1/2 md:w-2/3 mx-auto">
