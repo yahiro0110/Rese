@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
 import Pagination from '@/Components/Pagination.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 
 const props = defineProps({
@@ -12,12 +12,18 @@ const props = defineProps({
 });
 
 
-const searchText = sessionStorage.getItem('searchKey');
+const searchText = sessionStorage.getItem('searchKey') || '';
 const search = ref(searchText);
+const savedSelectedRoles = JSON.parse(sessionStorage.getItem('selectedRoles')) || [];
+const selectedRoles = ref(savedSelectedRoles);
+
+watch(selectedRoles, (newValue) => {
+    sessionStorage.setItem('selectedRoles', JSON.stringify(newValue));
+});
 
 const searchUser = () => {
     sessionStorage.setItem('searchKey', search.value);
-    Inertia.get(route('users.index', { search: search.value }));
+    Inertia.get(route('users.index', { search: search.value, roles: selectedRoles.value }));
 };
 </script>
 
@@ -36,6 +42,13 @@ const searchUser = () => {
                         <FlashMessage />
                         <section class="text-gray-600 body-font">
                             <div class="container px-5 py-8 mx-auto">
+                                <!-- ロール選択のチェックボックス -->
+                                <div class="flex pb-5">
+                                    <label v-for="role in roles" :key="role" class="inline-flex items-center">
+                                        <input type="checkbox" v-model="selectedRoles" :value="role.name">
+                                        <span class="ml-2">{{ role.name }}</span>
+                                    </label>
+                                </div>
                                 <!-- 検索バーとボタン -->
                                 <div class="flex pb-5 pl-5 my-4 lg:w-2/3 w-full mx-auto">
                                     <input type="text" class="w-2/3" v-model="search" placeholder="検索ワードを入力してください">

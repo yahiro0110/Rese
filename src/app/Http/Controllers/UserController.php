@@ -22,7 +22,7 @@ class UserController extends Controller
         return Inertia::render(
             'Users/Index',
             [
-                'users' => User::searchKey($request->search)->select('id', 'name', 'email')->paginate(10)->withQueryString(),
+                'users' => User::searchKey($request->search)->WithRoles($request->roles)->select('id', 'name', 'email')->paginate(10)->withQueryString(),
                 'roles' => Role::select('id', 'name')->get(),
             ]
         );
