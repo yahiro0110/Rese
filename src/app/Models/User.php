@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Arr;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -66,5 +67,34 @@ class User extends Authenticatable
         return $query->with(['roles' => function ($query) {
             $query->select('id', 'name');
         }]);
+    }
+
+    public function scopeSearchKey($query, $input = null)
+    {
+        if (!empty($input)) {
+            $likeInput = '%' . $input . '%';
+            if ($this::where('name', 'LIKE', $likeInput)->orwhere('email', 'LIKE', $likeInput)->exists()) {
+                return $query->where('name', 'LIKE', $likeInput)->orwhere('email', 'LIKE', $likeInput);
+            }
+        }
+    }
+
+    /**
+     * ロールによるフィルタリングのローカルスコープ
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed $roles
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithRoles($query, $roles)
+    {
+        if (is_array($roles) && count($roles) > 0) {
+            $roles = Arr::flatten($roles);
+            return $query->whereHas('roles', function ($query) use ($roles) {
+                $query->whereIn('name', $roles);
+            });
+        }
+
+        return $query;
     }
 }

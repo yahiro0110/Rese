@@ -16,12 +16,14 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request  $request)
     {
+        // ddd($request);
         return Inertia::render(
             'Users/Index',
             [
-                'users' => User::select('id', 'name', 'email')->paginate(10),
+                'users' => User::searchKey($request->search)->select('id', 'name', 'email')->paginate(10)->withQueryString(),
+                'roles' => Role::select('id', 'name')->get(),
             ]
         );
     }

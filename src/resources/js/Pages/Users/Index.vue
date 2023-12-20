@@ -3,10 +3,22 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
 import Pagination from '@/Components/Pagination.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import { ref } from 'vue';
+import { Inertia } from '@inertiajs/inertia';
 
-defineProps({
+const props = defineProps({
     users: Object,
+    roles: Array,
 });
+
+
+const searchText = sessionStorage.getItem('searchKey');
+const search = ref(searchText);
+
+const searchUser = () => {
+    sessionStorage.setItem('searchKey', search.value);
+    Inertia.get(route('users.index', { search: search.value }));
+};
 </script>
 
 <template>
@@ -24,6 +36,12 @@ defineProps({
                         <FlashMessage />
                         <section class="text-gray-600 body-font">
                             <div class="container px-5 py-8 mx-auto">
+                                <!-- 検索バーとボタン -->
+                                <div class="flex pb-5 pl-5 my-4 lg:w-2/3 w-full mx-auto">
+                                    <input type="text" class="w-2/3" v-model="search" placeholder="検索ワードを入力してください">
+                                    <button class="bg-blue-300 text-white py-2 px-2 mx-2" @click="searchUser">検索</button>
+                                </div>
+                                <!-- ユーザ一覧 -->
                                 <div class="lg:w-2/3 w-full mx-auto overflow-auto">
                                     <table class="table-auto w-full text-left whitespace-no-wrap">
                                         <thead>

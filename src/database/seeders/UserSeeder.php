@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
         }
 
         // ファクトリーを使った追加データの生成
-        User::factory()->count(28)->create()->each(function ($user) use ($roles) {
+        User::factory()->count(58)->create()->each(function ($user) use ($roles) {
             $user->roles()->attach(
                 $roles->random(rand(1, $roles->count()))->pluck('id')->toArray()
             );
