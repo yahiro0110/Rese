@@ -68,6 +68,7 @@ const updateUser = (id) => {
                                                         v-model="form.roles[role.id]">
                                                     <label :for="`role-${role.id}`" class="ml-2">{{ role.name }}</label>
                                                 </div>
+                                                <InputError class="p-1" :message="errors.roles" />
                                             </div>
                                             <div class="p-2 w-full">
                                                 <button

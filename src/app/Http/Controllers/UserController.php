@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -82,11 +83,11 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\UpdateUserRequest  $request
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
         DB::transaction(function () use ($request, $user) {
             // ユーザーの基本情報を更新する
