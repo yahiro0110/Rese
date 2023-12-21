@@ -88,10 +88,13 @@ class User extends Authenticatable
     {
         if (!empty($input)) {
             $likeInput = '%' . $input . '%';
-            if (self::where('name', 'LIKE', $likeInput)->orwhere('email', 'LIKE', $likeInput)->exists()) {
-                return $query->where('name', 'LIKE', $likeInput)->orwhere('email', 'LIKE', $likeInput);
-            }
+            return $query->where(function ($filterQuery) use ($likeInput) {
+                $filterQuery->where('name', 'LIKE', $likeInput)
+                    ->orWhere('email', 'LIKE', $likeInput);
+            });
         }
+
+        return $query;
     }
 
     /**
@@ -105,8 +108,8 @@ class User extends Authenticatable
     {
         if (is_array($roles) && count($roles) > 0) {
             $roles = Arr::flatten($roles);
-            return $query->whereHas('roles', function ($query) use ($roles) {
-                $query->whereIn('name', $roles);
+            return $query->whereHas('roles', function ($filterQuery) use ($roles) {
+                $filterQuery->whereIn('name', $roles);
             });
         }
 
