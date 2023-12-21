@@ -29,6 +29,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
 import Pagination from '@/Components/Pagination.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import HeaderMessage from '@/Components/HeaderMessage.vue';
 import { ref, watchEffect } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 
@@ -42,7 +43,7 @@ import { Inertia } from '@inertiajs/inertia';
 const props = defineProps({
     users: Object,
     roles: Array,
-    flash: Object,
+    message: Object,
 });
 
 /**
@@ -120,6 +121,7 @@ const searchClear = () => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                         <FlashMessage />
+                        <HeaderMessage :message="message" />
                         <section class="text-gray-600 body-font">
                             <div class="container px-5 py-8 mx-auto">
                                 <!-- ロール選択のチェックボックス -->

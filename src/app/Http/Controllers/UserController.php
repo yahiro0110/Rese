@@ -29,20 +29,16 @@ class UserController extends Controller
         // Userモデルを使用して、リクエストに基づいたユーザー検索とフィルタリングを実行する
         $users = User::searchAndFilter($request);
 
-        // 検索結果の総数を含むメッセージとステータス情報をセッションのフラッシュデータに追加する
-        session()->flash('message', "{$users->total()}件ヒットしました。");
-        session()->flash('status', 'info');
-
         // Inertiaを使用して、ユーザーデータとロールデータを含むビューをレンダリングする
-        // また、セッションのフラッシュデータをpropsとしてビューに渡す
         return Inertia::render(
             'Users/Index',
             [
                 'users' => $users,
                 'roles' => Role::select('id', 'name')->get(),
-                'flash' => [
-                    'message' => session('message'),
-                    'status' => session('status')
+                'message' => [
+                    'searchKey' => session('searchKey', ''),
+                    'selectedRoles' => session('selectedRoles', []),
+                    'resultCount' => $users->total(),
                 ],
             ]
         );
