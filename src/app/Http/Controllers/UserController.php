@@ -18,14 +18,63 @@ class UserController extends Controller
      */
     public function index(Request  $request)
     {
-        // ddd($request);
+        // リクエストに'clear'が含まれている場合、セッションの検索条件をクリアする
+        if ($request->has('clear')) {
+            session()->forget(['searchKey', 'selectedRoles']);
+        }
+
+        // リクエストに基づいて検索セッションを更新する
+        $this->updateSearchSession($request);
+
+        // Userモデルを使用して、リクエストに基づいたユーザー検索とフィルタリングを実行する
+        $users = User::searchAndFilter($request);
+
+        // 検索結果の総数を含むメッセージとステータス情報をセッションのフラッシュデータに追加する
+        session()->flash('message', "{$users->total()}件ヒットしました。");
+        session()->flash('status', 'info');
+
+        // Inertiaを使用して、ユーザーデータとロールデータを含むビューをレンダリングする
+        // また、セッションのフラッシュデータをpropsとしてビューに渡す
         return Inertia::render(
             'Users/Index',
             [
-                'users' => User::searchKey($request->search)->WithRoles($request->roles)->select('id', 'name', 'email')->paginate(10)->withQueryString(),
+                'users' => $users,
                 'roles' => Role::select('id', 'name')->get(),
+                'flash' => [
+                    'message' => session('message'),
+                    'status' => session('status')
+                ],
             ]
         );
+    }
+
+    /**
+     * リクエストに基づいて検索セッションを更新します。
+     *
+     * リクエストに 'search' または 'roles' パラメータが含まれている場合、これらの値をセッションに保存します。
+     * もしリクエストにこれらのパラメータが含まれていない場合は、以前のセッション値をリクエストにマージします。
+     * これにより、ユーザーの検索状態を維持します。
+     *
+     * @param Request $request ユーザーからのリクエスト。
+     * @return void このメソッドは戻り値を持ちません。
+     */
+    private function updateSearchSession(Request $request)
+    {
+        if ($request->filled('search') || $request->filled('roles')) {
+            // リクエストから検索条件を取得してセッションに保存
+            session([
+                'searchKey' => $request->input('search'),
+                'selectedRoles' => $request->input('roles'),
+            ]);
+        } else {
+            // セッションから検索条件を取得してリクエストにマージ
+            $searchKey = session('searchKey', '');
+            $selectedRoles = session('selectedRoles', []);
+            $request->merge([
+                'search' => $searchKey,
+                'roles' => $selectedRoles,
+            ]);
+        }
     }
 
     /**

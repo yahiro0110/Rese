@@ -13,6 +13,10 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    // --------------------------------------------------------------------------------
+    // モデル属性とリレーションシップ
+    // --------------------------------------------------------------------------------
+
     /**
      * The attributes that are mass assignable.
      *
@@ -56,11 +60,15 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'role_user');
     }
 
+    // --------------------------------------------------------------------------------
+    // クエリスコープとカスタムメソッド
+    // --------------------------------------------------------------------------------
+
     /**
-     * ユーザーに関連するロールのIDと名前のみを取得するローカルスコープ
+     * ユーザーのクエリにロールのIDと名前のみを含めるローカルスコープ。
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス。
+     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス。
      */
     public function scopeWithRolesOnlyIdAndName($query)
     {
@@ -69,22 +77,29 @@ class User extends Authenticatable
         }]);
     }
 
+    /**
+     * 検索キーワードに基づいてユーザーをフィルタリングするローカルスコープ。
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス。
+     * @param string|null $input 検索キーワード。
+     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス。
+     */
     public function scopeSearchKey($query, $input = null)
     {
         if (!empty($input)) {
             $likeInput = '%' . $input . '%';
-            if ($this::where('name', 'LIKE', $likeInput)->orwhere('email', 'LIKE', $likeInput)->exists()) {
+            if (self::where('name', 'LIKE', $likeInput)->orwhere('email', 'LIKE', $likeInput)->exists()) {
                 return $query->where('name', 'LIKE', $likeInput)->orwhere('email', 'LIKE', $likeInput);
             }
         }
     }
 
     /**
-     * ロールによるフィルタリングのローカルスコープ
+     * ロールによるフィルタリングを適用するローカルスコープ。
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param mixed $roles
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス。
+     * @param array|string $roles フィルタリングに使用するロール。
+     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス。
      */
     public function scopeWithRoles($query, $roles)
     {
@@ -96,5 +111,24 @@ class User extends Authenticatable
         }
 
         return $query;
+    }
+
+    // --------------------------------------------------------------------------------
+    // 静的ヘルパーメソッド
+    // --------------------------------------------------------------------------------
+
+    /**
+     * 検索キーワードとロールに基づいてユーザーを検索しフィルタリングするメソッド。
+     *
+     * @param \Illuminate\Http\Request $request リクエストデータ。
+     * @return \Illuminate\Pagination\LengthAwarePaginator ページネーションされたユーザーのコレクション。
+     */
+    public static function searchAndFilter($request)
+    {
+        return self::searchKey($request->search)
+            ->WithRoles($request->roles)
+            ->select('id', 'name', 'email')
+            ->paginate(10)
+            ->withQueryString();
     }
 }

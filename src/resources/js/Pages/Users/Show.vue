@@ -5,9 +5,15 @@ import { Head, Link } from '@inertiajs/inertia-vue3';
 import { Inertia } from '@inertiajs/inertia';
 import FlashMessage from '@/Components/FlashMessage.vue';
 
-defineProps({
+const props = defineProps({
     user: Object,
+    flash: Object,
 });
+
+if (props.flash.status === 'info') {
+    props.flash.message = null;
+    props.flash.status = null;
+}
 
 const deleteUser = (id) => {
     Inertia.delete(route('users.destroy', { user: id }), {
