@@ -31,7 +31,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/home', [RestaurantController::class, 'index'])
+Route::get('/home', [RestaurantController::class, 'home'])
     ->middleware(['auth', 'verified'])
     ->name('home');
 

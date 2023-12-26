@@ -10,6 +10,21 @@ use Inertia\Inertia;
 class RestaurantController extends Controller
 {
     /**
+     * Display the home page listing of restaurants.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function home()
+    {
+        return Inertia::render(
+            'Home',
+            [
+                'restaurants' => Restaurant::select('id', 'name', 'address', 'description')->get(),
+            ]
+        );
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
