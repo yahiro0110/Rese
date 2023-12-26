@@ -108,9 +108,11 @@ class User extends Authenticatable
     {
         if (is_array($roles) && count($roles) > 0) {
             $roles = Arr::flatten($roles);
-            return $query->whereHas('roles', function ($filterQuery) use ($roles) {
-                $filterQuery->whereIn('name', $roles);
-            });
+            foreach ($roles as $role) {
+                $query->whereHas('roles', function ($filterQuery) use ($role) {
+                    $filterQuery->where('name', $role);
+                });
+            }
         }
 
         return $query;
