@@ -51,14 +51,14 @@ const props = defineProps({
  * セッションストレージから「searchKey」を取得して初期化します。値が存在しない場合は、空文字列で初期化されます。
  * @type {Ref<String>}
  */
-const search = ref(sessionStorage.getItem('searchKey') || '');
+const search = ref(props.message.searchKey);
 
 /**
  * 選択されたユーザロールを追跡するリアクティブリファレンス。
  * セッションストレージから「selectedRoles」をJSONとして解析し、初期化します。値が存在しない場合は、空の配列で初期化されます。
  * @type {Ref<Array>}
  */
-const selectedRoles = ref(JSON.parse(sessionStorage.getItem('selectedRoles')) || []);
+const selectedRoles = ref(props.message.selectedRoles);
 
 /**
  * Vueのリアクティブシステムを使用して、`search` と `selectedRoles` の変更を監視し、
@@ -68,8 +68,8 @@ const selectedRoles = ref(JSON.parse(sessionStorage.getItem('selectedRoles')) ||
  * これにより、ページ再読み込み時にユーザの検索状態とロール選択状態を維持することができます。
  */
 watchEffect(() => {
-    sessionStorage.setItem('searchKey', search.value);
-    sessionStorage.setItem('selectedRoles', JSON.stringify(selectedRoles.value));
+    localStorage.setItem('searchKey', search.value);
+    localStorage.setItem('selectedRoles', JSON.stringify(selectedRoles.value));
 });
 
 /**
