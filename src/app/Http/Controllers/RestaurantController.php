@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreRestaurantRequest;
 use App\Http\Requests\UpdateRestaurantRequest;
 use App\Models\Restaurant;
+use Inertia\Inertia;
 
 class RestaurantController extends Controller
 {
@@ -15,7 +16,12 @@ class RestaurantController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render(
+            'Restaurants/Index',
+            [
+                'restaurants' => Restaurant::select('id', 'name', 'address', 'description')->get(),
+            ]
+        );
     }
 
     /**

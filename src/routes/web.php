@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,8 @@ use Inertia\Inertia;
 */
 
 Route::resource('users', UserController::class)->middleware('auth', 'verified');
+
+Route::resource('restaurants', RestaurantController::class)->middleware('auth', 'verified');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
