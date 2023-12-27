@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UploadController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +20,8 @@ use Inertia\Inertia;
 */
 
 Route::resource('users', UserController::class)->middleware('auth', 'verified');
+
+Route::resource('upload', UploadController::class);
 
 Route::resource('restaurants', RestaurantController::class)->middleware('auth', 'verified');
 
