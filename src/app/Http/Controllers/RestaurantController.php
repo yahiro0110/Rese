@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRestaurantRequest;
 use App\Http\Requests\UpdateRestaurantRequest;
+use App\Models\Genre;
 use App\Models\Restaurant;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -76,6 +77,7 @@ class RestaurantController extends Controller
             'Restaurants/Show',
             [
                 'restaurant' => $restaurant,
+                'genres' => Genre::select('id', 'name')->get(),
             ]
         );
     }
