@@ -27,6 +27,7 @@
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
+import FlashMessage from '@/Components/FlashMessage.vue';
 
 /**
  * コンポーネントのプロパティ定義。
@@ -54,6 +55,7 @@ const sushiImageUrl = '/storage/images/sushi.jpg';
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
+                        <FlashMessage />
                         <section class="text-gray-600 body-font">
                             <div class="container px-5 py-24 mx-auto">
                                 <div class="flex flex-wrap w-full mb-20">
@@ -77,6 +79,7 @@ const sushiImageUrl = '/storage/images/sushi.jpg';
                                             <h2 class="text-lg text-gray-900 font-medium title-font mb-4">{{ restaurant.name
                                             }}</h2>
                                             <Link as="button"
+                                                :href="route('restaurants.show', { restaurant: restaurant.id })"
                                                 class="flex ml-auto text-white bg-indigo-500 border-0 p-2 focus:outline-none hover:bg-indigo-600 rounded text-xs">
                                             詳細
                                             </Link>

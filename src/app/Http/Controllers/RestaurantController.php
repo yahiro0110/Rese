@@ -72,7 +72,12 @@ class RestaurantController extends Controller
      */
     public function show(Restaurant $restaurant)
     {
-        //
+        return Inertia::render(
+            'Restaurants/Show',
+            [
+                'restaurant' => $restaurant,
+            ]
+        );
     }
 
     /**
@@ -95,7 +100,22 @@ class RestaurantController extends Controller
      */
     public function update(UpdateRestaurantRequest $request, Restaurant $restaurant)
     {
-        //
+        $restaurant->update([
+            'name' => $request->name,
+            'tel' => $request->tel,
+            'email' => $request->email,
+            'postal' => $request->postal,
+            'address' => $request->address,
+            'description' => $request->description,
+            'restaurant_image' => $request->restaurant_image,
+            'prefecture_id' => $request->prefecture_id,
+            'genre_id' => $request->genre_id,
+        ]);
+
+        return to_route('restaurants.index', compact('restaurant'))->with([
+            'message' => '店舗情報を更新しました。',
+            'status' => 'success',
+        ]);
     }
 
     /**
