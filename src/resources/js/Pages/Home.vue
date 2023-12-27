@@ -26,7 +26,7 @@
  * @template ユーザ一覧の表示、検索バー、ロール選択チェックボックス、フラッシュメッセージ、ページネーション
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/inertia-vue3';
+import { Head, Link } from '@inertiajs/inertia-vue3';
 
 /**
  * コンポーネントのプロパティ定義。
@@ -66,22 +66,24 @@ const sushiImageUrl = '/storage/images/sushi.jpg';
                                                 <h2
                                                     class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
                                                     CATEGORY</h2>
-                                                <h2 class="title-font text-lg font-medium text-gray-900 mb-3">焼肉
+                                                <h2 class="title-font text-base font-medium text-gray-900 mb-3">{{
+                                                    restaurant.genre.name }}
                                                 </h2>
-                                                <h1 class="title-font text-lg font-medium text-gray-900 mb-3">{{
+                                                <h1 class="title-font text-2xl font-mono text-gray-900 mb-3">{{
                                                     restaurant.name }}
                                                 </h1>
                                                 <p class="leading-relaxed mb-3">{{ restaurant.description }}</p>
                                                 <div class="flex items-center flex-wrap ">
-                                                    <a class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0">Learn
-                                                        More
-                                                        <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor"
-                                                            stroke-width="2" fill="none" stroke-linecap="round"
-                                                            stroke-linejoin="round">
-                                                            <path d="M5 12h14"></path>
-                                                            <path d="M12 5l7 7-7 7"></path>
-                                                        </svg>
-                                                    </a>
+                                                    <Link :href="route('detail', { restaurant: restaurant.id })"
+                                                        class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0">
+                                                    詳細
+                                                    <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor"
+                                                        stroke-width="2" fill="none" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path d="M5 12h14"></path>
+                                                        <path d="M12 5l7 7-7 7"></path>
+                                                    </svg>
+                                                    </Link>
                                                     <span
                                                         class="text-gray-400 mr-3 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1 border-r-2 border-gray-200">
                                                         <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2"

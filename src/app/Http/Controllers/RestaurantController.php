@@ -19,7 +19,23 @@ class RestaurantController extends Controller
         return Inertia::render(
             'Home',
             [
-                'restaurants' => Restaurant::select('id', 'name', 'address', 'description')->get(),
+                'restaurants' => Restaurant::with('genre', 'prefecture')->get(),
+            ]
+        );
+    }
+
+    /**
+     * Display the home page listing of restaurants.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function detail(Restaurant $restaurant)
+    {
+        // ddd($restaurant);
+        return Inertia::render(
+            'Detail',
+            [
+                'restaurant' => $restaurant,
             ]
         );
     }
