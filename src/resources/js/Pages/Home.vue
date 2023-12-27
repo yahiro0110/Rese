@@ -56,7 +56,10 @@ function selectRestaurant(restaurant) {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">店舗一覧</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                <template v-if="selectedRestaurant">店舗詳細</template>
+                <template v-else>店舗一覧</template>
+            </h2>
         </template>
 
         <div class="py-12">
