@@ -25,8 +25,10 @@
  *
  * @template ユーザ一覧の表示、検索バー、ロール選択チェックボックス、フラッシュメッセージ、ページネーション
  */
+import { ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/inertia-vue3';
+import { Head } from '@inertiajs/inertia-vue3';
+import Detail from '@/Views/Detail.vue';
 
 /**
  * コンポーネントのプロパティ定義。
@@ -40,6 +42,13 @@ defineProps({
 });
 
 const sushiImageUrl = '/storage/images/sushi.jpg';
+
+const selectedRestaurant = ref(null);
+
+// レストランが選択された時の処理
+function selectRestaurant(restaurant) {
+    selectedRestaurant.value = restaurant;
+}
 </script>
 
 <template>
@@ -54,7 +63,7 @@ const sushiImageUrl = '/storage/images/sushi.jpg';
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <section class="text-gray-600 body-font">
+                        <section class="text-gray-600 body-font" v-if="!selectedRestaurant">
                             <div class="container px-5 py-24 mx-auto">
                                 <div class="flex flex-wrap -m-4">
                                     <div class="p-4 md:w-1/3" v-for="restaurant in restaurants" :key="restaurant.id">
@@ -73,23 +82,25 @@ const sushiImageUrl = '/storage/images/sushi.jpg';
                                                     restaurant.name }}
                                                 </h1>
                                                 <p class="leading-relaxed mb-3">{{ restaurant.description }}</p>
-                                                <div class="flex items-center flex-wrap ">
-                                                    <Link :href="route('detail', { restaurant: restaurant.id })"
+                                                <div class="flex items-center flex-wrap"
+                                                    @click="selectRestaurant(restaurant)">
+                                                    <a href="#"
                                                         class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0">
-                                                    詳細
-                                                    <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor"
-                                                        stroke-width="2" fill="none" stroke-linecap="round"
-                                                        stroke-linejoin="round">
-                                                        <path d="M5 12h14"></path>
-                                                        <path d="M12 5l7 7-7 7"></path>
-                                                    </svg>
-                                                    </Link>
+                                                        詳細
+                                                        <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor"
+                                                            stroke-width="2" fill="none" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path d="M5 12h14"></path>
+                                                            <path d="M12 5l7 7-7 7"></path>
+                                                        </svg>
+                                                    </a>
                                                     <span
                                                         class="text-gray-400 mr-3 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1 border-r-2 border-gray-200">
                                                         <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2"
                                                             fill="none" stroke-linecap="round" stroke-linejoin="round"
                                                             viewBox="0 0 24 24">
-                                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                                            </path>
                                                             <circle cx="12" cy="12" r="3"></circle>
                                                         </svg>1.2K
                                                     </span>
@@ -110,6 +121,7 @@ const sushiImageUrl = '/storage/images/sushi.jpg';
                                 </div>
                             </div>
                         </section>
+                        <Detail v-if="selectedRestaurant" :restaurant="selectedRestaurant" />
                     </div>
                 </div>
             </div>

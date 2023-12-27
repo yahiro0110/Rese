@@ -25,22 +25,6 @@ class RestaurantController extends Controller
     }
 
     /**
-     * Display the home page listing of restaurants.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function detail(Restaurant $restaurant)
-    {
-        // ddd($restaurant);
-        return Inertia::render(
-            'Detail',
-            [
-                'restaurant' => $restaurant,
-            ]
-        );
-    }
-
-    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
