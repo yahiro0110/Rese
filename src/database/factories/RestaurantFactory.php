@@ -25,6 +25,7 @@ class RestaurantFactory extends Factory
             'description' => '',
             'prefecture_id' => $this->faker->numberBetween(1, 47),
             'genre_id' => '',
+            'user_id' => $this->faker->numberBetween(3, 50),
         ];
     }
 }

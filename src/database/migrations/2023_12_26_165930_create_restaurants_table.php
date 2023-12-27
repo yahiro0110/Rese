@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('restaurant_image')->nullable();
             $table->foreignId('prefecture_id')->nullable()->constrained('prefectures')->onDelete('set null');
             $table->foreignId('genre_id')->nullable()->constrained('genres')->onDelete('set null');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
