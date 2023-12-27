@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreRestaurantRequest;
 use App\Http\Requests\UpdateRestaurantRequest;
 use App\Models\Restaurant;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class RestaurantController extends Controller
@@ -31,10 +32,13 @@ class RestaurantController extends Controller
      */
     public function index()
     {
+        // 現在ログインしているユーザーのIDを取得
+        $userId = Auth::id();
+
         return Inertia::render(
             'Restaurants/Index',
             [
-                'restaurants' => Restaurant::select('id', 'name', 'address', 'description')->get(),
+                'restaurants' => Restaurant::ofUser($userId)->get(),
             ]
         );
     }

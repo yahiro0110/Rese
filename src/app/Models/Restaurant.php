@@ -55,4 +55,9 @@ class Restaurant extends Model
     {
         return $this->belongsTo(Genre::class);
     }
+
+    public function scopeOfUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
 }
