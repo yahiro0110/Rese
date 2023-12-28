@@ -96,6 +96,15 @@ const isValidImageUrl = (url) => {
                                             </Link>
                                         </div>
                                     </div>
+                                    <div class="xl:w-1/4 md:w-1/2 p-4">
+                                        <div class="bg-gray-100 p-6 rounded-lg text-center">
+                                            <Link as="button" :href="route('restaurants.create')"
+                                                class="bg-gray-100 p-6 rounded-lg text-5xl">
+                                            +
+                                            </Link>
+                                            <p>店舗を登録する</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </section>

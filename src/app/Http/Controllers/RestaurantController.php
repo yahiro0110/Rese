@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreRestaurantRequest;
 use App\Http\Requests\UpdateRestaurantRequest;
 use App\Models\Genre;
+use App\Models\Prefecture;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -54,7 +55,13 @@ class RestaurantController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render(
+            'Restaurants/Create',
+            [
+                'genres' => Genre::select('id', 'name')->get(),
+                'prefectures' => Prefecture::select('id', 'name')->get(),
+            ]
+        );
     }
 
     /**
@@ -65,7 +72,31 @@ class RestaurantController extends Controller
      */
     public function store(StoreRestaurantRequest $request)
     {
-        //
+        if ($request->file('file')) {
+            // 新しいファイル名を生成し、ファイルを保存
+            $file_name = date('Ymd') . Str::random(15) . '_' . $request->file('file')->getClientOriginalName();
+            $request->file('file')->storeAs('public/images', $file_name);
+        } else {
+            $file_name = null;
+        }
+
+        Restaurant::create([
+            'name' => $request->name,
+            'tel' => $request->tel,
+            'email' => $request->email,
+            'postal' => $request->postal,
+            'address' => $request->address,
+            'description' => $request->description,
+            'restaurant_image' => $file_name,
+            'prefecture_id' => $request->prefecture_id,
+            'genre_id' => $request->genre_id,
+            'user_id' => Auth::id(),
+        ]);
+
+        return to_route('restaurants.index')->with([
+            'message' => '店舗情報を登録しました。',
+            'status' => 'success',
+        ]);
     }
 
     /**

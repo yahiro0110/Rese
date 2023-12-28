@@ -18,6 +18,7 @@ class Restaurant extends Model
      *
      * この属性リストを通じて、createやupdateメソッドなどで一括して割り当て可能なモデルの属性を定義する。
      * - `name` : 店舗の名前
+     * - `tel` : 店舗の電話番号
      * - `email` : 店舗のメールアドレス
      * - `postal` : 店舗の郵便番号７桁
      * - `address` : 店舗の住所
@@ -25,10 +26,11 @@ class Restaurant extends Model
      * - `restaurant_image : 店舗の画像パス
      * - `prefecture_id` : 店舗の地域ID
      * - `genre_id` : 店舗のジャンルID
+     * - `user_id` : 店舗代表者ID
      *
      * @var array
      */
-    protected $fillable = ['name', 'email', 'postal', 'address', 'description', 'restaurant_image', 'prefecture_id', 'genre_id'];
+    protected $fillable = ['name', 'tel', 'email', 'postal', 'address', 'description', 'restaurant_image', 'prefecture_id', 'genre_id', 'user_id'];
 
     /**
      * 店舗に関連する地域を取得します。
