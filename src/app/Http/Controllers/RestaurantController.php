@@ -6,6 +6,8 @@ use App\Http\Requests\StoreRestaurantRequest;
 use App\Http\Requests\UpdateRestaurantRequest;
 use App\Models\Genre;
 use App\Models\Restaurant;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -100,8 +102,13 @@ class RestaurantController extends Controller
      * @param  \App\Models\Restaurant  $restaurant
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateRestaurantRequest $request, Restaurant $restaurant)
+    public function update(Request $request, Restaurant $restaurant)
     {
+        $file_name = $restaurant->restaurant_image;
+        if ($request->file('file')) {
+            $file_name = date('Ymd') . Str::random(15) . '_' . $request->file('file')->getClientOriginalName();
+            $request->file('file')->storeAs('public/images', $file_name);
+        }
         $restaurant->update([
             'name' => $request->name,
             'tel' => $request->tel,
@@ -109,7 +116,7 @@ class RestaurantController extends Controller
             'postal' => $request->postal,
             'address' => $request->address,
             'description' => $request->description,
-            'restaurant_image' => $request->restaurant_image,
+            'restaurant_image' => $file_name,
             'prefecture_id' => $request->prefecture_id,
             'genre_id' => $request->genre_id,
         ]);

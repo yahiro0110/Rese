@@ -1,49 +1,17 @@
 <script setup>
-/**
- * @file index.vue
- * @description ユーザ一覧ページのVueコンポーネント。認証済みユーザのみアクセス可能で、ユーザ情報の一覧表示と検索機能を提供します。
- *
- * @component
- * @requires AuthenticatedLayout: 認証済みユーザ用のレイアウトコンポーネント
- * @requires Pagination: ページネーションコンポーネント
- * @requires FlashMessage: フラッシュメッセージ表示コンポーネント
- * @requires @inertiajs/inertia-vue3: Inertia.jsのVue 3バインディング
- * @requires vue: Vue.jsフレームワーク
- * @requires @inertiajs/inertia: Inertia.jsライブラリ
- *
- * @prop {Object} users - 表示するユーザデータ
- * @prop {Array} roles - 利用可能なユーザロール
- * @prop {Object} flash - フラッシュメッセージ情報
- *
- * @data {String} search - 検索クエリ文字列
- * @data {Array} selectedRoles - 選択されたロール
- *
- * @method searchUser 検索クエリと選択されたロールに基づいてユーザを検索
- * @method searchClear 検索フィールドと選択されたロールをクリア
- *
- * @watchEffect セッションストレージとの状態同期を管理
- *
- * @template ユーザ一覧の表示、検索バー、ロール選択チェックボックス、フラッシュメッセージ、ページネーション
- */
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/inertia-vue3';
-import { reactive } from 'vue';
-import { Inertia } from '@inertiajs/inertia';
+import { Head, router, useForm } from '@inertiajs/inertia-vue3';
+import { reactive, ref } from 'vue';
+// import { Inertia } from '@inertiajs/inertia';
 import InputError from '@/Components/InputError.vue';
 
-/**
- * コンポーネントのプロパティ定義。
- *
- * @property {Object} users - ユーザ情報を含むオブジェクト。各ユーザは一意のID、名前、メールアドレスなどの情報を持つ。
- * @property {Array} roles - 利用可能なユーザロールの配列。各ロールは一意の名前と説明を持つ。
- * @property {Object} flash - フラッシュメッセージに関するデータ。メッセージの内容やステータス（成功、警告など）を含む。
- */
 const props = defineProps({
     restaurant: Object,
     genres: Array,
 });
 
-const form = reactive({
+const form = useForm({
     id: props.restaurant.id,
     name: props.restaurant.name,
     tel: props.restaurant.tel,
@@ -51,14 +19,18 @@ const form = reactive({
     postal: props.restaurant.postal,
     address: props.restaurant.address,
     description: props.restaurant.description,
+    restaurant_image: props.restaurant.restaurant_image,
     genre_id: props.restaurant.genre_id,
     prefecture_id: props.restaurant.prefecture_id,
+    file: null,
 });
 
-const sushiImageUrl = '/storage/images/sushi.jpg';
+const file = ref(null);
+
+const sushiImageUrl = '/storage/images/notfound.png';
 
 const updateRestaurant = (id) => {
-    Inertia.put(route('restaurants.update', { restaurant: id }), form);
+    form.post(route('restaurants.formUpdate', { restaurant: id }));
 };
 </script>
 
@@ -145,6 +117,12 @@ const updateRestaurant = (id) => {
                                             <label for="description" class="leading-7 text-sm text-gray-600">店舗の説明</label>
                                             <textarea id="description" name="description" v-model="form.description"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                                        </div>
+                                        <div class="relative mb-4">
+                                            <label for="file" class="leading-7 text-sm text-gray-600">画像</label>
+                                            <input type="file" id="file" name="file" ref="file"
+                                                @input="form.file = $event.target.files[0]"
+                                                class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         </div>
                                         <button
                                             class="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新</button>

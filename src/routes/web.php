@@ -21,9 +21,11 @@ use Inertia\Inertia;
 
 Route::resource('users', UserController::class)->middleware('auth', 'verified');
 
+// TODO: 検証用で設定したルートなのであとで削除する
 Route::resource('upload', UploadController::class);
 
 Route::resource('restaurants', RestaurantController::class)->middleware('auth', 'verified');
+Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->name('restaurants.formUpdate');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
