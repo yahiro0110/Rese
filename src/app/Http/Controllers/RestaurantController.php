@@ -9,6 +9,7 @@ use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class RestaurantController extends Controller
@@ -106,6 +107,11 @@ class RestaurantController extends Controller
     {
         $file_name = $restaurant->restaurant_image;
         if ($request->file('file')) {
+            // 古いファイルが存在するか確認し、存在する場合は削除
+            if (Storage::exists('public/images/' . $file_name)) {
+                Storage::delete('public/images/' . $file_name);
+            }
+            // 新しいファイル名を生成し、ファイルを保存
             $file_name = date('Ymd') . Str::random(15) . '_' . $request->file('file')->getClientOriginalName();
             $request->file('file')->storeAs('public/images', $file_name);
         }

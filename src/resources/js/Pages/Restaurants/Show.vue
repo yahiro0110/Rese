@@ -1,8 +1,8 @@
 <script setup>
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router, useForm } from '@inertiajs/inertia-vue3';
-import { reactive, ref } from 'vue';
+import { Head, useForm } from '@inertiajs/inertia-vue3';
+import { ref } from 'vue';
 // import { Inertia } from '@inertiajs/inertia';
 import InputError from '@/Components/InputError.vue';
 
@@ -26,8 +26,6 @@ const form = useForm({
 });
 
 const file = ref(null);
-
-const sushiImageUrl = '/storage/images/notfound.png';
 
 const updateRestaurant = (id) => {
     form.post(route('restaurants.formUpdate', { restaurant: id }));
@@ -119,10 +117,10 @@ const updateRestaurant = (id) => {
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
                                         </div>
                                         <div class="relative mb-4">
-                                            <label for="file" class="leading-7 text-sm text-gray-600">画像</label>
+                                            <label for="file" class="leading-7 text-sm text-gray-600">店舗の画像</label>
                                             <input type="file" id="file" name="file" ref="file"
                                                 @input="form.file = $event.target.files[0]"
-                                                class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                                class="w-full bg-white rounded focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-sm outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         </div>
                                         <button
                                             class="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新</button>
