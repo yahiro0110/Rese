@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue';
 import { Core as YubinBangoCore } from 'yubinbango-core2';
 
 const props = defineProps({
+    errors: Object,
     restaurant: Object,
     genres: Array,
 });
@@ -90,6 +91,8 @@ const updateRestaurant = (id) => {
                                     <form @submit.prevent="updateRestaurant(restaurant.id)">
                                         <h2 class="text-gray-900 text-lg mb-1 font-medium title-font">店舗の情報</h2>
                                         <p class="leading-relaxed mb-5 text-sm text-gray-600">店舗の情報を編集することができます。</p>
+                                        <p class="leading-relaxed mb-2 text-sm text-gray-600"><span
+                                                class="text-red-500 text-lg">*</span>は入力必須です。</p>
                                         <div class="relative mb-4">
                                             <label for="genre" class="leading-7 text-sm text-gray-600">ジャンル</label>
                                             <div class="relative">
@@ -102,42 +105,61 @@ const updateRestaurant = (id) => {
                                             </div>
                                         </div>
                                         <div class="relative mb-4">
-                                            <label for="name" class="leading-7 text-sm text-gray-600">店舗名</label>
+                                            <label for="name" class="leading-7 text-sm text-gray-600">店舗名
+                                                <span class="text-red-500 text-lg">*</span>
+                                            </label>
                                             <input type="text" id="name" name="name" v-model="form.name"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            <InputError class="p-1" :message="errors.name" />
                                         </div>
                                         <div class="relative mb-4">
-                                            <label for="tel" class="leading-7 text-sm text-gray-600">電話番号</label>
+                                            <label for="tel" class="leading-7 text-sm text-gray-600">電話番号
+                                                <span class="text-red-500 text-lg">*</span>
+                                            </label>
                                             <input type="text" id="tel" name="tel" v-model="form.tel"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            <InputError class="p-1" :message="errors.tel" />
                                         </div>
                                         <div class="relative mb-4">
-                                            <label for="email" class="leading-7 text-sm text-gray-600">メールアドレス</label>
+                                            <label for="email" class="leading-7 text-sm text-gray-600">メールアドレス
+                                                <span class="text-red-500 text-lg">*</span>
+                                            </label>
                                             <input type="email" id="email" name="email" v-model="form.email"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            <InputError class="p-1" :message="errors.email" />
                                         </div>
                                         <div class="relative mb-4">
-                                            <label for="postal" class="leading-7 text-sm text-gray-600">郵便番号</label>
+                                            <label for="postal" class="leading-7 text-sm text-gray-600">郵便番号
+                                                <span class="text-red-500 text-lg">*</span>
+                                            </label>
                                             <input type="text" id="postal" name="postal" @input="validatePostal"
                                                 @change="fetchAddress" v-model="form.postal"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                                                 maxlength="7">
+                                            <InputError class="p-1" :message="errors.postal" />
                                         </div>
                                         <div class="relative mb-4">
-                                            <label for="address" class="leading-7 text-sm text-gray-600">住所</label>
+                                            <label for="address" class="leading-7 text-sm text-gray-600">住所
+                                                <span class="text-red-500 text-lg">*</span>
+                                            </label>
                                             <input type="text" id="address" name="address" v-model="form.address"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            <InputError class="p-1" :message="errors.address" />
                                         </div>
                                         <div class="relative mb-4">
                                             <label for="description" class="leading-7 text-sm text-gray-600">店舗の説明</label>
                                             <textarea id="description" name="description" v-model="form.description"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                                            <InputError class="p-1" :message="errors.description" />
                                         </div>
                                         <div class="relative mb-4">
                                             <label for="file" class="leading-7 text-sm text-gray-600">店舗の画像</label>
                                             <input type="file" id="file" name="file" ref="file"
                                                 @input="form.file = $event.target.files[0]"
                                                 class="w-full bg-white rounded focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-sm outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            <p class="mt-1 text-sm text-red-500" id="file_input_help">
+                                                PNG, JPG or JPEG (MAX. 5MB)</p>
+                                            <InputError class="p-1" :message="errors.file" />
                                         </div>
                                         <button
                                             class="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新</button>
