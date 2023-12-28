@@ -3,8 +3,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
 import { ref } from 'vue';
-// import { Inertia } from '@inertiajs/inertia';
 import InputError from '@/Components/InputError.vue';
+import { Core as YubinBangoCore } from 'yubinbango-core2';
 
 const props = defineProps({
     restaurant: Object,
@@ -26,6 +26,22 @@ const form = useForm({
 });
 
 const file = ref(null);
+
+const fetchAddress = () => {
+    new YubinBangoCore(String(form.postal), (value) => {
+        form.address = value.region + value.locality + value.street;
+    })
+}
+
+// 郵便番号の検証メソッドを追加
+const validatePostal = (event) => {
+    // 7桁の数字のみを許可する正規表現
+    const regex = /^\d{0,7}$/;
+    if (!regex.test(event.target.value)) {
+        // 正規表現にマッチしない場合、最後の文字を削除
+        form.postal = form.postal.slice(0, -1);
+    }
+};
 
 const updateRestaurant = (id) => {
     form.post(route('restaurants.formUpdate', { restaurant: id }));
@@ -52,7 +68,7 @@ const updateRestaurant = (id) => {
                                         marginheight="0" marginwidth="0" scrolling="no"
                                         src="https://maps.google.com/maps?width=100%&height=600&hl=en&q=%C4%B0zmir+(My%20Business%20Name)&ie=UTF8&t=&z=14&iwloc=B&output=embed"
                                         style="filter: grayscale(1) contrast(1.2) opacity(0.4);"></iframe>
-                                    <div class="bg-white relative flex flex-wrap py-6 rounded shadow-md">
+                                    <div class="bg-white relative flex flex-wrap py-6 mr-4 rounded shadow-md w-full">
                                         <div class="lg:w-1/2 px-6">
                                             <h2 class="title-font font-semibold text-gray-900 tracking-widest text-xs">
                                                 住所</h2>
@@ -90,7 +106,6 @@ const updateRestaurant = (id) => {
                                             <input type="text" id="name" name="name" v-model="form.name"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         </div>
-
                                         <div class="relative mb-4">
                                             <label for="tel" class="leading-7 text-sm text-gray-600">電話番号</label>
                                             <input type="text" id="tel" name="tel" v-model="form.tel"
@@ -103,8 +118,10 @@ const updateRestaurant = (id) => {
                                         </div>
                                         <div class="relative mb-4">
                                             <label for="postal" class="leading-7 text-sm text-gray-600">郵便番号</label>
-                                            <input type="text" id="postal" name="postal" v-model="form.postal"
-                                                class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            <input type="text" id="postal" name="postal" @input="validatePostal"
+                                                @change="fetchAddress" v-model="form.postal"
+                                                class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                                                maxlength="7">
                                         </div>
                                         <div class="relative mb-4">
                                             <label for="address" class="leading-7 text-sm text-gray-600">住所</label>
