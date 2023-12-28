@@ -41,7 +41,7 @@ defineProps({
     restaurants: Array,
 });
 
-const sushiImageUrl = '/storage/images/sushi.jpg';
+const notfoundImage = '/storage/images/notfound.jpeg';
 
 const selectedRestaurant = ref(null);
 
@@ -49,6 +49,11 @@ const selectedRestaurant = ref(null);
 function selectRestaurant(restaurant) {
     selectedRestaurant.value = restaurant;
 }
+
+// 画像URLが有効かどうかをチェックするメソッド
+const isValidImageUrl = (url) => {
+    return url && url.length > 0;
+};
 </script>
 
 <template>
@@ -72,8 +77,14 @@ function selectRestaurant(restaurant) {
                                     <div class="p-4 md:w-1/3" v-for="restaurant in restaurants" :key="restaurant.id">
                                         <div
                                             class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
-                                            <img class="lg:h-48 md:h-36 w-full object-cover object-center"
-                                                :src="sushiImageUrl" alt="blog">
+                                            <!-- 条件付きレンダリングで画像を表示 -->
+                                            <img v-if="isValidImageUrl(restaurant.restaurant_image)"
+                                                class="lg:h-48 md:h-36 w-full object-cover object-center"
+                                                :src="'/storage/images/' + restaurant.restaurant_image"
+                                                alt="restaurant image">
+                                            <!-- 画像が無効の場合は代替画像を表示 -->
+                                            <img v-else class="lg:h-48 md:h-36 w-full object-cover object-center"
+                                                :src="notfoundImage" alt="not found">
                                             <div class="p-6">
                                                 <h2
                                                     class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
