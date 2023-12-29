@@ -127,7 +127,7 @@ const createRestaurant = () => {
                     <div class="p-6 text-gray-900">
                         <section class="text-gray-600 body-font relative">
                             <div class="container px-5 py-24 mx-auto flex sm:flex-nowrap flex-wrap">
-                                <div class="lg:w-3/4 md:w-1/2 bg-gray-100 rounded-lg sm:mr-10 p-10 grid-background">
+                                <div class="lg:w-3/4 md:w-1/2 bg-gray-100 rounded-lg sm:mr-10 p-4 md:p-10 grid-background">
                                     <p>表示プレビュー</p>
                                     <section class="text-gray-600 body-font">
                                         <div class="container px-5 py-5 mx-auto">
