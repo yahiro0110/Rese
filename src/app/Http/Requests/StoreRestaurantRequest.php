@@ -67,7 +67,7 @@ class StoreRestaurantRequest extends FormRequest
 
             'file.image' => 'ファイルは画像である必要があります',
             'file.mimes' => '画像は jpeg, png, jpg 形式である必要があります',
-            'file.max' => '画像のサイズは5000キロバイト以下にしてください',
+            'file.max' => '画像のサイズは5MB以下にしてください',
         ];
     }
 }
