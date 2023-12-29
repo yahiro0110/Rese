@@ -24,12 +24,13 @@ class UpdateRestaurantRequest extends FormRequest
     public function rules()
     {
         return [
+            'genre_id' => ['required'],
             'name' => ['required', 'string', 'max:60'],
             'tel' => ['required', 'string', 'max:21'],
             'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zAZ]{2,4}$/', 'max:254'],
             'postal' => ['required', 'string', 'regex:/^\d{7}$/'],
             'address' => ['required', 'string', 'max:161'],
-            'description' => ['nullable', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:255'],
             'file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,', 'max:5000'],
         ];
     }
@@ -37,6 +38,8 @@ class UpdateRestaurantRequest extends FormRequest
     public function messages()
     {
         return [
+            'genre_id.required' => 'ジャンルは必須です',
+
             'name.required' => '名前は必須です',
             'name.string' => '名前は文字列で入力してください',
             'name.max' => '名前は60文字以内で入力してください',
@@ -64,7 +67,7 @@ class UpdateRestaurantRequest extends FormRequest
 
             'file.image' => 'ファイルは画像である必要があります',
             'file.mimes' => '画像は jpeg, png, jpg 形式である必要があります',
-            'file.max' => '画像のサイズは5000キロバイト以下にしてください',
+            'file.max' => '画像のサイズは5MB以下にしてください',
         ];
     }
 }

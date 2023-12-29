@@ -112,6 +112,7 @@ class RestaurantController extends Controller
             [
                 'restaurant' => $restaurant,
                 'genres' => Genre::select('id', 'name')->get(),
+                'prefectures' => Prefecture::select('id', 'name')->get(),
             ]
         );
     }
