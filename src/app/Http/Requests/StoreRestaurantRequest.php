@@ -30,7 +30,7 @@ class StoreRestaurantRequest extends FormRequest
             'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zAZ]{2,4}$/', 'max:254'],
             'postal' => ['required', 'string', 'regex:/^\d{7}$/'],
             'address' => ['required', 'string', 'max:161'],
-            'description' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:125'],
             'file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,', 'max:5000'],
         ];
     }
@@ -64,7 +64,7 @@ class StoreRestaurantRequest extends FormRequest
 
             'description.required' => '説明は必須です',
             'description.string' => '説明は文字列で入力してください',
-            'description.max' => '説明は255文字以内で入力してください',
+            'description.max' => '説明は125文字以内で入力してください',
 
             'file.image' => 'ファイルは画像である必要があります',
             'file.mimes' => '画像は jpeg, png, jpg 形式である必要があります',

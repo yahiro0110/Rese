@@ -93,6 +93,14 @@ const updatePrefectureId = () => {
 // form.address または form.postal が変更されるたびに都道府県IDを更新
 watch([() => form.address], updatePrefectureId);
 
+// 最大文字数を定義
+const maxCharacters = 125;
+
+// 残り文字数を計算するリアクティブなプロパティ
+const remainingCharacters = computed(() => {
+    return maxCharacters - form.description.length;
+});
+
 const updateRestaurant = (id) => {
     form
         .transform((data) => ({
@@ -127,7 +135,7 @@ const updateRestaurant = (id) => {
                                             style="filter: grayscale(1) contrast(1.2) opacity(0.4);"></iframe>
                                         <div class="h-72"></div>
                                     </div>
-                                    <div class="w-full bg-gray-100 rounded-lg sm:mr-10 p-4 md:p-10 grid-background">
+                                    <div class="w-full bg-gray-100 rounded-lg sm:mr-10 p-4 md:p-10">
                                         <p class="text-sm md:text-base text-center md:text-left">表示プレビュー</p>
                                         <section class="text-gray-600 body-font">
                                             <div class="container md:px-5 md:py-5 mx-auto">
@@ -153,7 +161,8 @@ const updateRestaurant = (id) => {
                                                                     class="title-font text-2xl font-mono text-gray-900 mb-3">
                                                                     {{ form.name }}
                                                                 </h1>
-                                                                <p class="leading-relaxed mb-3">{{ form.description }}</p>
+                                                                <p class="leading-relaxed mb-3 auto-break-text">{{
+                                                                    form.description }}</p>
                                                                 <div class="flex items-center flex-wrap">
                                                                     <a href="#"
                                                                         class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0">
@@ -255,8 +264,13 @@ const updateRestaurant = (id) => {
                                             <label for="description" class="leading-7 text-sm text-gray-600">店舗の説明
                                                 <span class="text-red-500 text-lg">*</span>
                                             </label>
-                                            <textarea id="description" name="description" v-model="form.description"
+                                            <textarea id="description" name="description" maxlength="125"
+                                                v-model="form.description"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                                            <!-- 残りの入力可能文字数を表示 -->
+                                            <p class="text-sm text-red-500">
+                                                残りの入力可能文字数: {{ remainingCharacters }}
+                                            </p>
                                             <InputError class="p-1" :message="errors.description" />
                                         </div>
                                         <div class="relative mb-4">
@@ -280,3 +294,12 @@ const updateRestaurant = (id) => {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+/* 表示プレビューの説明文が改行されるように設定 */
+.auto-break-text {
+    word-break: break-all;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+</style>

@@ -91,6 +91,17 @@ const updatePrefectureId = () => {
 // form.address または form.postal が変更されるたびに都道府県IDを更新
 watch([() => form.address], updatePrefectureId);
 
+// 最大文字数を定義
+const maxCharacters = 125;
+
+// 残り文字数を計算するリアクティブなプロパティ
+const remainingCharacters = computed(() => {
+    if (form.description) {
+        return maxCharacters - form.description.length;
+    }
+    return maxCharacters;
+});
+
 const createRestaurant = () => {
     form
         .transform((data) => ({
@@ -140,7 +151,8 @@ const createRestaurant = () => {
                                                             <h1 class="title-font text-2xl font-mono text-gray-900 mb-3">
                                                                 {{ form.name }}
                                                             </h1>
-                                                            <p class="leading-relaxed mb-3">{{ form.description }}</p>
+                                                            <p class="leading-relaxed mb-3 auto-break-text">
+                                                                {{ form.description }}</p>
                                                             <div class="flex items-center flex-wrap">
                                                                 <a href="#"
                                                                     class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0">
@@ -241,8 +253,13 @@ const createRestaurant = () => {
                                             <label for="description" class="leading-7 text-sm text-gray-600">店舗の説明
                                                 <span class="text-red-500 text-lg">*</span>
                                             </label>
-                                            <textarea id="description" name="description" v-model="form.description"
+                                            <textarea id="description" name="description" maxlength="125"
+                                                v-model="form.description"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                                            <!-- 残りの入力可能文字数を表示 -->
+                                            <p class="text-sm text-red-500">
+                                                残りの入力可能文字数: {{ remainingCharacters }}
+                                            </p>
                                             <InputError class="p-1" :message="errors.description" />
                                         </div>
                                         <div class="relative mb-4">
@@ -273,5 +290,12 @@ const createRestaurant = () => {
     background-image: linear-gradient(0deg, transparent 24px, rgba(0, 0, 0, 0.1) 25px),
         linear-gradient(90deg, transparent 24px, rgba(0, 0, 0, 0.1) 25px);
     background-size: 25px 25px;
+}
+
+/* 表示プレビューの説明文が改行されるように設定 */
+.auto-break-text {
+    word-break: break-all;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
 </style>
