@@ -31,7 +31,7 @@ const fetchAddress = () => {
     new YubinBangoCore(String(form.postal), (value) => {
         form.address = value.region + value.locality + value.street;
     })
-}
+};
 
 // 郵便番号の検証メソッドを追加
 const validatePostal = (event) => {
@@ -41,6 +41,20 @@ const validatePostal = (event) => {
         // 正規表現にマッチしない場合、最後の文字を削除
         form.postal = form.postal.slice(0, -1);
     }
+};
+
+const validatePhoneNumber = (event) => {
+    // 入力された電話番号
+    let phoneNumber = event.target.value;
+
+    // 全角文字を削除
+    phoneNumber = phoneNumber.replace(/[^\x20-\x7E]/g, '');
+
+    // 半角数字とハイフン以外を全て削除
+    phoneNumber = phoneNumber.replace(/[^0-9\-]/g, '');
+
+    // フォームの値を更新
+    form.tel = phoneNumber;
 };
 
 // 現在選択されているジャンルの名前を返す算出プロパティ
@@ -80,7 +94,13 @@ const updatePrefectureId = () => {
 watch([() => form.address], updatePrefectureId);
 
 const updateRestaurant = (id) => {
-    form.post(route('restaurants.formUpdate', { restaurant: id }));
+    form
+        .transform((data) => ({
+            ...data,
+            // 郵便番号で数字以外の文字をハイフンに置換する
+            tel: data.tel.replace(/[^\d]/g, '-'),
+        }))
+        .post(route('restaurants.formUpdate', { restaurant: id }));
 };
 </script>
 
@@ -201,6 +221,7 @@ const updateRestaurant = (id) => {
                                                 <span class="text-red-500 text-lg">*</span>
                                             </label>
                                             <input type="text" id="tel" name="tel" v-model="form.tel"
+                                                @input="validatePhoneNumber"
                                                 class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             <InputError class="p-1" :message="errors.tel" />
                                         </div>

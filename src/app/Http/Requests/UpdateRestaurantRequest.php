@@ -26,7 +26,7 @@ class UpdateRestaurantRequest extends FormRequest
         return [
             'genre_id' => ['required'],
             'name' => ['required', 'string', 'max:60'],
-            'tel' => ['required', 'string', 'max:21'],
+            'tel' => ['required', 'string', 'regex:/^[0-9-]+$/', 'max:21'],
             'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zAZ]{2,4}$/', 'max:254'],
             'postal' => ['required', 'string', 'regex:/^\d{7}$/'],
             'address' => ['required', 'string', 'max:161'],
@@ -46,6 +46,7 @@ class UpdateRestaurantRequest extends FormRequest
 
             'tel.required' => '電話番号は必須です',
             'tel.string' => '電話番号は文字列で入力してください',
+            'tel.regex' => '電話番号は数字とハイフンのみで入力してください',
             'tel.max' => '電話番号は21文字以内で入力してください',
 
             'email.required' => 'メールアドレスは必須です',
