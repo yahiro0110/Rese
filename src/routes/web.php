@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UploadController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +21,12 @@ use Inertia\Inertia;
 
 Route::resource('users', UserController::class)->middleware('auth', 'verified');
 
+// TODO: 検証用で設定したルートなのであとで削除する
+Route::resource('upload', UploadController::class);
+
+Route::resource('restaurants', RestaurantController::class)->middleware('auth', 'verified');
+Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->name('restaurants.formUpdate');
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -28,9 +36,9 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/home', [RestaurantController::class, 'home'])
+    ->middleware(['auth', 'verified'])
+    ->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
