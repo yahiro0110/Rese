@@ -173,6 +173,22 @@ class RestaurantController extends Controller
      */
     public function destroy(Restaurant $restaurant)
     {
-        //
+        try {
+            $restaurant->delete();
+            // 古いファイルが存在するか確認し、存在する場合は削除
+            if ($restaurant->restaurant_image && Storage::exists('public/images/' . $restaurant->restaurant_image)) {
+                Storage::delete('public/images/' . $restaurant->restaurant_image);
+            }
+
+            return to_route('restaurants.index')->with([
+                'message' => '店舗を削除しました。',
+                'status' => 'danger',
+            ]);
+        } catch (\Exception $e) {
+            return to_route('restaurants.index')->with([
+                'message' => '店舗の削除に失敗しました。',
+                'status' => 'warning',
+            ]);
+        }
     }
 }
