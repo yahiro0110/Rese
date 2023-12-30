@@ -26,7 +26,7 @@ defineProps({
  *
  * @type {string} - 画像が見つからない場合のデフォルト画像のファイルパス
  */
-const notfoundImage = '/storage/images/notfound.jpeg';
+const notfoundImage = '/images/notfound.jpeg';
 
 /**
  * 与えられたURLが有効な画像URLであるかどうかを判定する関数。
