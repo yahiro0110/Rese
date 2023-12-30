@@ -1,12 +1,30 @@
 <script setup>
-
+/**
+ * @requires AuthenticatedLayout - 認証済みユーザ用のレイアウトコンポーネント
+ * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
+ * @requires useForm - Inertia.jsのフォームハンドリング機能を提供し、フォームの状態管理や送信時の処理を容易にする
+ * @requires watch - 指定されたリアクティブなデータソースの変更を監視し、
+ *                   変更があった場合に指定されたコールバック関数を実行するために使用される
+ * @requires Inertia - @inertiajs/inertiaパッケージからインポート。SPA(Single Page Application)のような体験を提供するための
+ *                     クライアントサイドのページ遷移やサーバーとのデータ送受信を行うライブラリの主要オブジェクト
+ * @requires InputError - フォーム入力エラーを表示するためのコンポーネント
+ * @requires useRestaurantForm - 店舗フォームのカスタムフック機能を提供。フォームの検証やデータハンドリングを行う
+ */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
 import { Inertia } from '@inertiajs/inertia';
-import { ref, computed, watch } from 'vue';
+import { watch } from 'vue';
 import InputError from '@/Components/InputError.vue';
-import { Core as YubinBangoCore } from 'yubinbango-core2';
+import { useRestaurantForm } from '@/commons/useRestaurantForm'
 
+/**
+ * コンポーネントのプロパティ定義。
+ *
+ * @property {Object} errors - フォーム入力時のエラーメッセージを含むオブジェクト
+ * @property {Object} restaurant - 特定IDの店舗の情報を含むオブジェクト
+ * @property {Array} genres - 利用可能なジャンルの配列。各ジャンルは一意のID、名前の情報を持つ
+ * @property {Array} prefectures - 利用可能な都道府県の配列。各都道府県は一意のID、名前の情報を持つ
+ */
 const props = defineProps({
     errors: Object,
     restaurant: Object,
@@ -14,6 +32,22 @@ const props = defineProps({
     prefectures: Array,
 });
 
+/**
+ * 店舗登録フォームのデータモデル。
+ *
+ * @type {Object} form - 店舗の登録に必要なデータを保持するフォームオブジェクト
+ * @property {number|null} id - 店舗ID、初期値はpropsから受け取った値
+ * @property {string|null} name - 店舗の名前、初期値はpropsから受け取った値
+ * @property {string|null} tel - 店舗の電話番号、初期値はpropsから受け取った値
+ * @property {string|null} email - 店舗のメールアドレス、初期値はpropsから受け取った値
+ * @property {string|null} postal - 店舗の郵便番号、初期値はpropsから受け取った値
+ * @property {string|null} address - 店舗の住所、初期値はpropsから受け取った値
+ * @property {string|null} description - 店舗の説明、初期値はpropsから受け取った値
+ * @property {string|null} restaurant_image - 店舗の画像、初期値はpropsから受け取った値
+ * @property {number|null} genre_id - 店舗のジャンルID、初期値はpropsから受け取った値
+ * @property {number|null} prefecture_id - 店舗の都道府県ID、初期値はpropsから受け取った値
+ * @property {File|null} file - 店舗の画像ファイル、初期値はnull
+ */
 const form = useForm({
     id: props.restaurant.id,
     name: props.restaurant.name,
@@ -28,80 +62,48 @@ const form = useForm({
     file: null,
 });
 
-const fetchAddress = () => {
-    new YubinBangoCore(String(form.postal), (value) => {
-        form.address = value.region + value.locality + value.street;
-    })
-};
+/**
+ * useRestaurantFormカスタムフックからのデータとメソッド。
+ *
+ * @type {Object} formUtils - フォーム関連のユーティリティ関数とデータ
+ * @property {Function} selectedGenreName - 選択されたジャンルの名前を返す関数
+ * @property {Function} validatePhoneNumber - 電話番号のバリデーションを行う関数
+ * @property {Function} validatePostal - 郵便番号のバリデーションを行う関数
+ * @property {Function} fetchAddress - 郵便番号に基づいて住所を取得する関数
+ * @property {Function} updatePrefectureId - 住所に基づいて都道府県IDを更新する関数
+ * @property {Function} remainingCharacters - 店舗説明エリアの残り文字数を計算する関数
+ * @property {ref<string|null>} imagePreview - 店舗画像のプレビュー用のURLを提供するリアクティブなプロパティ
+ *                                             フォームに店舗画像がある場合はそのパスを、そうでなければnullを保持する
+ * @property {Function} handleFileChange - ファイル選択をハンドルする関数
+ */
+const {
+    selectedGenreName,
+    validatePhoneNumber,
+    validatePostal,
+    fetchAddress,
+    updatePrefectureId,
+    remainingCharacters,
+    imagePreview,
+    handleFileChange,
+} = useRestaurantForm(props, form);
 
-// 郵便番号の検証メソッドを追加
-const validatePostal = (event) => {
-    // 7桁の数字のみを許可する正規表現
-    const regex = /^\d{0,7}$/;
-    if (!regex.test(event.target.value)) {
-        // 正規表現にマッチしない場合、最後の文字を削除
-        form.postal = form.postal.slice(0, -1);
-    }
-};
-
-const validatePhoneNumber = (event) => {
-    // 入力された電話番号
-    let phoneNumber = event.target.value;
-
-    // 全角文字を削除
-    phoneNumber = phoneNumber.replace(/[^\x20-\x7E]/g, '');
-
-    // 半角数字とハイフン以外を全て削除
-    phoneNumber = phoneNumber.replace(/[^0-9\-]/g, '');
-
-    // フォームの値を更新
-    form.tel = phoneNumber;
-};
-
-// 現在選択されているジャンルの名前を返す算出プロパティ
-const selectedGenreName = computed(() => {
-    const selectedGenre = props.genres.find(genre => genre.id === form.genre_id);
-    return selectedGenre ? selectedGenre.name : '未選択';
-});
-
-// 画像のDataURLを格納するためのリアクティブなプロパティ
-const imagePreview = ref('/storage/images/' + props.restaurant.restaurant_image);
-
-// ファイル選択時に呼ばれるメソッド
-const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            imagePreview.value = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-};
-
-// 住所から都道府県IDを厳密に検出する関数
-const updatePrefectureId = () => {
-    for (const prefecture of props.prefectures) {
-        if (form.address.startsWith(prefecture.name)) {
-            form.prefecture_id = prefecture.id;
-            return;
-        }
-    }
-    // 該当する都道府県が見つからない場合はIDをnullまたは初期値に設定
-    form.prefecture_id = null;
-};
-
-// form.address または form.postal が変更されるたびに都道府県IDを更新
+/**
+ * form.addressの変更を監視し、都道府県IDを更新するウォッチャー。
+ * form.addressが変更されるたびに、updatePrefectureId関数が呼び出される。
+ * これにより、ユーザーが入力した住所に基づいて、適切な都道府県IDがフォームに設定される。
+ *
+ * @watch form.address - フォームの住所フィールド
+ * @action updatePrefectureId - 住所の変更に応じて都道府県IDを更新するアクション
+ */
 watch([() => form.address], updatePrefectureId);
 
-// 最大文字数を定義
-const maxCharacters = 125;
-
-// 残り文字数を計算するリアクティブなプロパティ
-const remainingCharacters = computed(() => {
-    return maxCharacters - form.description.length;
-});
-
+/**
+ * 指定されたIDのレストランを更新するための関数。
+ * フォームデータを変換し、Inertia.jsのpostメソッドを使用してサーバーに送信する。
+ * 特に電話番号フィールドでは、数字以外の文字をハイフンに置換する処理をおこなう。
+ *
+ * @param {number} id - 更新するレストランの一意識別子
+ */
 const updateRestaurant = (id) => {
     form
         .transform((data) => ({
@@ -112,6 +114,13 @@ const updateRestaurant = (id) => {
         .post(route('restaurants.formUpdate', { restaurant: id }));
 };
 
+/**
+ * 指定されたIDのレストランを削除するための関数。
+ * Inertia.jsのdeleteメソッドを使用してサーバーに削除リクエストを送信する。
+ * 削除の確認ダイアログが表示され、ユーザーが確認した場合のみ削除処理が実行される。
+ *
+ * @param {number} id - 削除するレストランの一意識別子
+ */
 const deleteRestaurant = (id) => {
     Inertia.delete(route('restaurants.destroy', { restaurant: id }), {
         onBefore: () => confirm('店舗を削除しますか？'),
@@ -145,21 +154,12 @@ const deleteRestaurant = (id) => {
                                                 <div class="flex flex-wrap -m-4">
                                                     <div class="py-4 md:px-4 w-full">
                                                         <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden bg-white">
-                                                            <!-- 条件付きレンダリングで画像を表示 -->
-                                                            <!-- <img class="lg:h-48 md:h-36 w-full object-cover object-center"
-                                                            src="https://dummyimage.com/1200x500" alt="restaurant image"> -->
                                                             <img v-if="imagePreview" :src="imagePreview" class="lg:h-48 md:h-36 w-full object-cover object-center" alt="Preview image">
                                                             <div class="p-6">
-                                                                <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
-                                                                    CATEGORY</h2>
-                                                                <h2 class="title-font text-base font-medium text-gray-900 mb-3">
-                                                                    {{ selectedGenreName }}
-                                                                </h2>
-                                                                <h1 class="title-font text-2xl font-mono text-gray-900 mb-3">
-                                                                    {{ form.name }}
-                                                                </h1>
-                                                                <p class="leading-relaxed mb-3 auto-break-text">{{
-                                                                    form.description }}</p>
+                                                                <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">CATEGORY</h2>
+                                                                <h2 class="title-font text-base font-medium text-gray-900 mb-3">{{ selectedGenreName }}</h2>
+                                                                <h1 class="title-font text-2xl font-mono text-gray-900 mb-3">{{ form.name }}</h1>
+                                                                <p class="leading-relaxed mb-3 auto-break-text">{{ form.description }}</p>
                                                                 <div class="flex items-center flex-wrap">
                                                                     <a href="#" class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0">
                                                                         詳細
@@ -171,8 +171,7 @@ const deleteRestaurant = (id) => {
                                                                     <span class="text-gray-400 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1">
                                                                         <button class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
                                                                             <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5" viewBox="0 0 24 24">
-                                                                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z">
-                                                                                </path>
+                                                                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path>
                                                                             </svg>
                                                                         </button>
                                                                     </span>
@@ -196,9 +195,7 @@ const deleteRestaurant = (id) => {
                                             </label>
                                             <div class="relative">
                                                 <select v-model="form.genre_id" class="w-1/3 rounded border appearance-none border-gray-300 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 text-base pl-3 pr-10">
-                                                    <option v-for="genre in genres" :key="genre.id" :value="genre.id">
-                                                        {{ genre.name }}
-                                                    </option>
+                                                    <option v-for="genre in genres" :key="genre.id" :value="genre.id">{{ genre.name }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -242,25 +239,19 @@ const deleteRestaurant = (id) => {
                                                 <span class="text-red-500 text-lg">*</span>
                                             </label>
                                             <textarea id="description" name="description" maxlength="125" v-model="form.description" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
-                                            <!-- 残りの入力可能文字数を表示 -->
-                                            <p class="text-sm text-red-500">
-                                                残りの入力可能文字数: {{ remainingCharacters }}
-                                            </p>
+                                            <p class="text-sm text-red-500">残りの入力可能文字数: {{ remainingCharacters }}</p>
                                             <InputError class="p-1" :message="errors.description" />
                                         </div>
                                         <div class="relative mb-4">
                                             <label for="file" class="leading-7 text-sm text-gray-600">店舗の画像</label>
                                             <input type="file" id="file" name="file" ref="file" @change="handleFileChange" @input="form.file = $event.target.files[0]" class="w-full bg-white rounded focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-sm outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                            <p class="mt-1 text-sm text-red-500" id="file_input_help">
-                                                PNG, JPG or JPEG (MAX. 5MB)</p>
+                                            <p class="mt-1 text-sm text-red-500" id="file_input_help">PNG, JPG or JPEG (MAX. 5MB)</p>
                                             <InputError class="p-1" :message="errors.file" />
                                         </div>
                                         <div class="mt-4 flex">
                                             <button class="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg mr-2">更新</button>
-                                            <button type="button" @click="deleteRestaurant(restaurant.id)" class="text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg">
-                                                削除</button>
+                                            <button type="button" @click="deleteRestaurant(restaurant.id)" class="text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-lg">削除</button>
                                         </div>
-
                                     </form>
                                 </div>
                             </div>
