@@ -1,6 +1,7 @@
 <script setup>
 import { Head } from '@inertiajs/inertia-vue3';
 import { defineEmits, ref } from 'vue';
+import ScheduleBooker from '@/Views/ScheduleBooker.vue';
 
 // propsの定義
 const props = defineProps({
@@ -13,12 +14,10 @@ const emit = defineEmits(['back']);
 const showContent = ref(false);
 
 const openModal = () => {
-    console.log('open');
     showContent.value = true;
 };
 
 const closeModal = () => {
-    console.log('close');
     showContent.value = false;
 };
 
@@ -31,12 +30,13 @@ function emitBackEvent() {
 <template>
     <Head title="詳細" />
     <section class="text-gray-600 body-font overflow-hidden">
-        <div id="overlay" v-show="showContent">
+        <!-- <div id="overlay" v-show="showContent">
             <div id="content">
                 <p>これがモーダルウィンドウです。</p>
                 <p><button @click='closeModal'>close</button></p>
             </div>
-        </div>
+        </div> -->
+        <ScheduleBooker v-if="showContent" @closeModal="closeModal" />
         <div class="container px-5 py-24 mx-auto">
             <!-- 戻るリンクの追加 -->
             <div class="text-center md:text-left md:px-10 md:pb-5">
@@ -110,31 +110,3 @@ function emitBackEvent() {
         </div>
     </section>
 </template>
-
-<style scoped>
-#overlay {
-    /*　要素を重ねた時の順番　*/
-    z-index: 1;
-
-    /*　画面全体を覆う設定　*/
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-
-    /*　画面の中央に要素を表示させる設定　*/
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#content {
-    z-index: 2;
-    height: 50%;
-    width: 50%;
-    padding: 1em;
-    background: #fff;
-}
-</style>
