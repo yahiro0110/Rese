@@ -1,6 +1,6 @@
 <script setup>
 /**
- * @requires AuthenticatedLayout: 認証済みユーザ用のレイアウトコンポーネント
+ * @requires AuthenticatedLayout - 認証済みユーザ用のレイアウトコンポーネント
  * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
  * @requires Link - @inertiajs/inertia-vue3からインポート
  *                  Inertia.jsを用いたアプリケーション内のページ間ナビゲーションを提供するVueコンポーネント
