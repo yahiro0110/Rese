@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UploadController;
 use Illuminate\Foundation\Application;
@@ -26,6 +27,8 @@ Route::resource('upload', UploadController::class);
 
 Route::resource('restaurants', RestaurantController::class)->middleware('auth', 'verified');
 Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->name('restaurants.formUpdate');
+
+Route::resource('schedules', ScheduleController::class)->middleware('auth', 'verified');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

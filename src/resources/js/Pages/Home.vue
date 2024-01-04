@@ -1,61 +1,70 @@
 <script setup>
 /**
- * @file index.vue
- * @description ユーザ一覧ページのVueコンポーネント。認証済みユーザのみアクセス可能で、ユーザ情報の一覧表示と検索機能を提供します。
- *
- * @component
- * @requires AuthenticatedLayout: 認証済みユーザ用のレイアウトコンポーネント
- * @requires Pagination: ページネーションコンポーネント
- * @requires FlashMessage: フラッシュメッセージ表示コンポーネント
- * @requires @inertiajs/inertia-vue3: Inertia.jsのVue 3バインディング
- * @requires vue: Vue.jsフレームワーク
- * @requires @inertiajs/inertia: Inertia.jsライブラリ
- *
- * @prop {Object} users - 表示するユーザデータ
- * @prop {Array} roles - 利用可能なユーザロール
- * @prop {Object} flash - フラッシュメッセージ情報
- *
- * @data {String} search - 検索クエリ文字列
- * @data {Array} selectedRoles - 選択されたロール
- *
- * @method searchUser 検索クエリと選択されたロールに基づいてユーザを検索
- * @method searchClear 検索フィールドと選択されたロールをクリア
- *
- * @watchEffect セッションストレージとの状態同期を管理
- *
- * @template ユーザ一覧の表示、検索バー、ロール選択チェックボックス、フラッシュメッセージ、ページネーション
+ * @requires AuthenticatedLayout - 認証済みユーザ用のレイアウトコンポーネント
+ * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
+ * @requires ref - リアクティブなデータ参照を作成するために使用
+ * @requires Detail - 店舗詳細情報を表示するためのVueコンポーネント
+ * @requires FlashMessage - フラッシュメッセージ表示コンポーネント
  */
-import { ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
+import { ref } from 'vue';
 import Detail from '@/Views/Detail.vue';
+import FlashMessage from '@/Components/FlashMessage.vue';
 
 /**
  * コンポーネントのプロパティ定義。
  *
- * @property {Object} users - ユーザ情報を含むオブジェクト。各ユーザは一意のID、名前、メールアドレスなどの情報を持つ。
- * @property {Array} roles - 利用可能なユーザロールの配列。各ロールは一意の名前と説明を持つ。
- * @property {Object} flash - フラッシュメッセージに関するデータ。メッセージの内容やステータス（成功、警告など）を含む。
+ * @property {Object} errors - エラーメッセージを含むオブジェクト
+ * @property {Array} restaurants - 店舗の情報を含むオブジェクトの配列
  */
 defineProps({
+    errors: Object,
     restaurants: Array,
 });
 
+/**
+ * 画像が見つからない場合に表示されるデフォルトの画像パス。
+ * この変数は、指定された画像リソースが存在しない、またはアクセスできない場合に使用される。
+ * '/storage/images/notfound.jpeg' への相対パスを指定している。
+ *
+ * @type {string} - 画像が見つからない場合のデフォルト画像のファイルパス
+ */
 const notfoundImage = '/images/notfound.jpeg';
 
+/**
+ * 選択された店舗の情報を保持するリアクティブな参照。
+ * ユーザーが店舗を選択すると、その情報がこの参照に格納される。
+ *
+ * @type {ref|null} - 選択された店舗のオブジェクト、または選択されていない場合はnull
+ */
 const selectedRestaurant = ref(null);
 
-// レストランが選択された時の処理
-function selectRestaurant(restaurant) {
+/**
+ * 店舗が選択された時の処理。
+ * 引数として受け取った店舗オブジェクトを、selectedRestaurantに設定する。
+ *
+ * @param {Object} restaurant - 選択された店舗のオブジェクト
+ */
+const selectRestaurant = (restaurant) => {
     selectedRestaurant.value = restaurant;
 }
 
-// レストラン選択をクリアする関数
-function clearSelectedRestaurant() {
+/**
+ * 店舗選択をクリアする関数。
+ * selectedRestaurantをnullに設定し、選択された店舗情報をリセットする。
+ */
+const clearSelectedRestaurant = () => {
     selectedRestaurant.value = null;
 }
 
-// 画像URLが有効かどうかをチェックするメソッド
+/**
+ * 画像URLが有効かどうかをチェックする関数。
+ * URLが非空かつ正しい形式であることを確認する。
+ *
+ * @param {string} url - チェックする画像のURL
+ * @returns {boolean} - URLが有効であればtrue、そうでなければfalse
+ */
 const isValidImageUrl = (url) => {
     return url && url.length > 0;
 }
@@ -76,6 +85,7 @@ const isValidImageUrl = (url) => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
+                        <FlashMessage />
                         <section class="text-gray-600 body-font" v-if="!selectedRestaurant">
                             <div class="container px-5 py-24 mx-auto">
                                 <div class="flex flex-wrap -m-4">
@@ -118,7 +128,7 @@ const isValidImageUrl = (url) => {
                                 </div>
                             </div>
                         </section>
-                        <Detail v-if="selectedRestaurant" :restaurant="selectedRestaurant" @back="clearSelectedRestaurant" />
+                        <Detail v-if="selectedRestaurant" v-bind="{ restaurant: selectedRestaurant, errors }" @back="clearSelectedRestaurant" />
                     </div>
                 </div>
             </div>

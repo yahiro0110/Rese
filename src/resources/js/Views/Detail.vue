@@ -1,27 +1,56 @@
 <script setup>
+/**
+ * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
+ * @requires defineEmits - Vueコンポーネントのイベントを定義するために使用
+ * @requires ref - リアクティブなデータ参照を作成するために使用
+ * @requires ScheduleBooker - 店舗予約フォームを表示するためのVueコンポーネント
+ */
 import { Head } from '@inertiajs/inertia-vue3';
 import { defineEmits, ref } from 'vue';
 import ScheduleBooker from '@/Views/ScheduleBooker.vue';
 
-// propsの定義
+/**
+ * コンポーネントのプロパティ定義。
+ *
+ * @property {Object} errors - エラーメッセージを含むオブジェクト
+ * @property {Object} restaurant - 選択された店舗の情報を含むオブジェクト
+ */
 const props = defineProps({
+    errors: Object,
     restaurant: Object
 });
 
-// emit関数の定義
+/**
+ * イベントを発火させるためのemit関数を定義。
+ * @property {Function} back - 'back'イベントを発火させる関数
+ */
 const emit = defineEmits(['back']);
 
+/**
+ * モーダルウィンドウの表示状態を管理するリアクティブな参照。
+ * モーダルウィンドウが表示されている場合はtrue、そうでない場合はfalse。
+ *
+ * @type {ref<boolean>}
+ */
 const showContent = ref(false);
 
+/**
+ * モーダルウィンドウを開く関数。
+ */
 const openModal = () => {
     showContent.value = true;
 };
 
+/**
+ * モーダルウィンドウを閉じる関数。
+ */
 const closeModal = () => {
     showContent.value = false;
 };
 
-// イベントを発火するメソッドを定義
+/**
+ * 'back'イベントを発火させる関数。
+ */
 function emitBackEvent() {
     emit('back');
 }
@@ -30,15 +59,8 @@ function emitBackEvent() {
 <template>
     <Head title="詳細" />
     <section class="text-gray-600 body-font overflow-hidden">
-        <!-- <div id="overlay" v-show="showContent">
-            <div id="content">
-                <p>これがモーダルウィンドウです。</p>
-                <p><button @click='closeModal'>close</button></p>
-            </div>
-        </div> -->
-        <ScheduleBooker v-if="showContent" @closeModal="closeModal" />
+        <ScheduleBooker v-if="showContent" v-bind="{ restaurantId: restaurant.id, errors }" @closeModal="closeModal" />
         <div class="container px-5 py-24 mx-auto">
-            <!-- 戻るリンクの追加 -->
             <div class="text-center md:text-left md:px-10 md:pb-5">
                 <a href="#" class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0" @click="emitBackEvent">
                     <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -68,11 +90,10 @@ function emitBackEvent() {
                         <span class="ml-auto text-gray-900">{{ restaurant.email }}</span>
                     </div>
                     <div class="flex">
-                        <button @click='openModal' class="flex ml-auto text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">予約する</button>
+                        <button @click="openModal" class="flex ml-auto text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">予約する</button>
                         <button class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
                             <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5" viewBox="0 0 24 24">
-                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z">
-                                </path>
+                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path>
                             </svg>
                         </button>
                     </div>
