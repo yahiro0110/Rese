@@ -95,7 +95,16 @@ class ScheduleController extends Controller
      */
     public function update(UpdateScheduleRequest $request, Schedule $schedule)
     {
-        //
+        $schedule->update([
+            'date' => $request->date,
+            'time' => $request->time,
+            'members' => $request->members,
+        ]);
+
+        return to_route('schedules.index')->with([
+            'message' => '予約情報を更新しました。',
+            'status' => 'success',
+        ]);
     }
 
     /**

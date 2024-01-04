@@ -59,7 +59,7 @@ function emitBackEvent() {
 <template>
     <Head title="詳細" />
     <section class="text-gray-600 body-font overflow-hidden">
-        <ScheduleBooker v-if="showContent" v-bind="{ restaurantId: restaurant.id, errors }" @closeModal="closeModal" />
+        <ScheduleBooker v-if="showContent" v-bind="{ restaurantId: restaurant.id, schedule: null, errors }" @closeModal="closeModal" />
         <div class="container px-5 py-24 mx-auto">
             <div class="text-center md:text-left md:px-10 md:pb-5">
                 <a href="#" class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0" @click="emitBackEvent">
