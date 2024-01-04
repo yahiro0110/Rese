@@ -4,7 +4,7 @@
  * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
  * @requires Link - @inertiajs/inertia-vue3からインポート
  *                  Inertia.jsを用いたアプリケーション内のページ間ナビゲーションを提供するVueコンポーネント
- * @requires FlashMessage: フラッシュメッセージ表示コンポーネント
+ * @requires FlashMessage - フラッシュメッセージ表示コンポーネント
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
