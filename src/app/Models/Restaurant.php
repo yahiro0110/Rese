@@ -62,4 +62,17 @@ class Restaurant extends Model
     {
         return $query->where('user_id', $userId);
     }
+
+    /**
+     * 店舗に関連する予約情報を取得する。
+     *
+     * このメソッドは一対多のリレーションシップを表し、関連するScheduleモデルのインスタンスのコレクションを返す。
+     * 店舗は `schedules` テーブルを介して予約情報と関連付けられる。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function schedules()
+    {
+        return $this->hasMany(schedule::class);
+    }
 }
