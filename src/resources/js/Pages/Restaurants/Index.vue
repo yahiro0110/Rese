@@ -8,7 +8,9 @@
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
+import { ref } from 'vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import ScheduleList from '@/Views/ScheduleList.vue';
 
 /**
  * コンポーネントのプロパティ定義。
@@ -30,7 +32,7 @@ const notfoundImage = '/images/notfound.jpeg';
 
 /**
  * 与えられたURLが有効な画像URLであるかどうかを判定する関数。
- * URLが非空であることを確認することで、有効なURLかどうかをチェックします。
+ * URLが非空であることを確認することで、有効なURLかどうかをチェックする。
  *
  * @param {string} url - 検証する画像のURL
  * @returns {boolean} URLが有効である場合はtrue、そうでなければfalseを返す
@@ -38,6 +40,56 @@ const notfoundImage = '/images/notfound.jpeg';
 const isValidImageUrl = (url) => {
     return url && url.length > 0;
 };
+
+/**
+ * モーダルウィンドウの表示状態を管理するリアクティブな参照。
+ * モーダルウィンドウが表示されている場合はtrue、そうでない場合はfalse。
+ *
+ * @type {ref<boolean>}
+ */
+const showContent = ref(false);
+
+/**
+ * モーダルウィンドウを開く関数。
+ */
+const openModal = () => {
+    showContent.value = true;
+};
+
+/**
+ * モーダルウィンドウを閉じる関数。
+ */
+const closeModal = () => {
+    showContent.value = false;
+};
+
+/**
+ * 選択された店舗の名前を保持するリアクティブな参照。
+ * ユーザーが店舗を選択すると、その名前がこの参照に格納される。
+ *
+ * @type {ref|null} - 選択された店舗の名前、または選択されていない場合はnull
+ */
+const selectedRestaurantName = ref(null);
+
+/**
+ * 選択された店舗の予約情報を保持するリアクティブな参照。
+ * ユーザーが店舗を選択すると、その情報がこの参照に格納される。
+ *
+ * @type {ref|null} - 選択された店舗のオブジェクト、または選択されていない場合はnull
+ */
+const selectedSchedule = ref(null);
+
+/**
+ * 特定の予約情報が選択された時の処理。
+ * 引数として受け取った予約情報のオブジェクトをselectedScheduleに設定し、モーダルウィンドウを開く。
+ *
+ * @param {Array} Schedules - 選択された予約情報のオブジェクトの配列
+ */
+const selectSchedule = (restaurantName, Schedules) => {
+    selectedRestaurantName.value = restaurantName;
+    selectedSchedule.value = Schedules;
+    openModal();
+}
 </script>
 
 <template>
@@ -54,6 +106,7 @@ const isValidImageUrl = (url) => {
                     <div class="p-6 text-gray-900">
                         <FlashMessage />
                         <section class="text-gray-600 body-font">
+                            <ScheduleList v-if="showContent" v-bind="{ restaurantName: selectedRestaurantName, schedules: selectedSchedule }" @closeModal="closeModal" />
                             <div class="container px-5 py-24 mx-auto">
                                 <div class="flex flex-wrap w-full mb-20">
                                     <div class="lg:w-1/2 w-full mb-6 lg:mb-0">
@@ -72,11 +125,12 @@ const isValidImageUrl = (url) => {
                                             <img v-if="isValidImageUrl(restaurant.restaurant_image)" class="lg:h-48 md:h-36 w-full object-cover object-center" :src="'/storage/images/' + restaurant.restaurant_image" alt="restaurant image">
                                             <!-- 画像が無効の場合は代替画像を表示 -->
                                             <img v-else class="lg:h-48 md:h-36 w-full object-cover object-center" :src="notfoundImage" alt="not found">
-                                            <h3 class="tracking-widest text-indigo-500 text-xs font-medium title-font">店舗名</h3>
+                                            <h3 class="tracking-widest text-indigo-500 text-xs font-medium title-font mt-2">店舗名</h3>
                                             <h2 class="text-lg text-gray-900 font-medium title-font mb-4">{{ restaurant.name }}</h2>
-                                            <Link as="button" :href="route('restaurants.show', { restaurant: restaurant.id })" class="flex ml-auto text-white bg-indigo-500 border-0 p-2 focus:outline-none hover:bg-indigo-600 rounded text-xs">
-                                            詳細
-                                            </Link>
+                                            <div class="flex justify-end">
+                                                <button type="button" @click="selectSchedule(restaurant.name, restaurant.schedules)" class="flex text-white bg-indigo-500 border-0 p-2 mx-2 focus:outline-none hover:bg-indigo-600 rounded text-xs">予約状況</button>
+                                                <Link as="button" :href="route('restaurants.show', { restaurant: restaurant.id })" class="flex text-white bg-indigo-500 border-0 p-2 focus:outline-none hover:bg-indigo-600 rounded text-xs">詳細</Link>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="xl:w-1/4 md:w-1/2 p-4">
