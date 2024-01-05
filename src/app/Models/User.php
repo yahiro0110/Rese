@@ -60,6 +60,19 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'role_user');
     }
 
+    /**
+     * ユーザーに関連する予約情報を取得する。
+     *
+     * このメソッドは一対多のリレーションシップを表し、関連するScheduleモデルのインスタンスのコレクションを返す。
+     * ユーザは `schedules` テーブルを介して予約情報と関連付けられる。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function schedules()
+    {
+        return $this->hasMany(schedule::class);
+    }
+
     // --------------------------------------------------------------------------------
     // クエリスコープとカスタムメソッド
     // --------------------------------------------------------------------------------

@@ -43,7 +43,7 @@ class RestaurantController extends Controller
         return Inertia::render(
             'Restaurants/Index',
             [
-                'restaurants' => Restaurant::ofUser($userId)->get(),
+                'restaurants' => Restaurant::with('schedules.user')->ofUser($userId)->get(),
             ]
         );
     }
