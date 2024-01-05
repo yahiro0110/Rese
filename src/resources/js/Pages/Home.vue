@@ -8,7 +8,7 @@
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import Detail from '@/Views/Detail.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 
@@ -18,7 +18,7 @@ import FlashMessage from '@/Components/FlashMessage.vue';
  * @property {Object} errors - エラーメッセージを含むオブジェクト
  * @property {Array} restaurants - 店舗の情報を含むオブジェクトの配列
  */
-defineProps({
+const props = defineProps({
     errors: Object,
     restaurants: Array,
 });
@@ -68,6 +68,18 @@ const clearSelectedRestaurant = () => {
 const isValidImageUrl = (url) => {
     return url && url.length > 0;
 }
+
+const toggleLike = (restaurant) => {
+    restaurant.liked = !restaurant.liked;
+}
+
+// restaurantsの各オブジェクトにlikedプロパティを追加
+onMounted(() => {
+    props.restaurants.forEach(restaurant => {
+        restaurant.liked = false;
+    });
+});
+
 </script>
 
 <template>
@@ -114,8 +126,8 @@ const isValidImageUrl = (url) => {
                                                         </svg>
                                                     </a>
                                                     <span class="text-gray-400 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1">
-                                                        <button class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
-                                                            <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5" viewBox="0 0 24 24">
+                                                        <button class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4" @click="toggleLike(restaurant)" :class="{ 'bg-red-100 animate-bounce': restaurant.liked }">
+                                                            <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5" viewBox="0 0 24 24" :class="{ 'text-red-500 animate-bounce': restaurant.liked }">
                                                                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z">
                                                                 </path>
                                                             </svg>
@@ -128,7 +140,7 @@ const isValidImageUrl = (url) => {
                                 </div>
                             </div>
                         </section>
-                        <Detail v-if="selectedRestaurant" v-bind="{ restaurant: selectedRestaurant, errors }" @back="clearSelectedRestaurant" />
+                        <Detail v-if="selectedRestaurant" v-bind="{ restaurant: selectedRestaurant, errors }" @back="clearSelectedRestaurant" @toggleLike="toggleLike" />
                     </div>
                 </div>
             </div>
