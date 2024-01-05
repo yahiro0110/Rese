@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateRestaurantRequest;
 use App\Models\Genre;
 use App\Models\Prefecture;
 use App\Models\Restaurant;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -187,6 +186,23 @@ class RestaurantController extends Controller
         } catch (\Exception $e) {
             return to_route('restaurants.index')->with([
                 'message' => '店舗の削除に失敗しました。',
+                'status' => 'warning',
+            ]);
+        }
+    }
+
+    public function attachFavorite(Restaurant $restaurant)
+    {
+        $restaurant->users()->attach(Auth::id());
+    }
+
+    public function detachFavorite(Restaurant $restaurant)
+    {
+        try {
+            $restaurant->users()->detach(Auth::id());
+        } catch (\Exception $e) {
+            return to_route('home')->with([
+                'message' => 'お気に入りから削除に失敗しました。',
                 'status' => 'warning',
             ]);
         }

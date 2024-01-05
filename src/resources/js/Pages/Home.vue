@@ -11,6 +11,7 @@ import { Head } from '@inertiajs/inertia-vue3';
 import { onMounted, ref } from 'vue';
 import Detail from '@/Views/Detail.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import { Inertia } from '@inertiajs/inertia';
 
 /**
  * コンポーネントのプロパティ定義。
@@ -70,15 +71,47 @@ const isValidImageUrl = (url) => {
 }
 
 const toggleLike = (restaurant) => {
-    restaurant.liked = !restaurant.liked;
+    if (!restaurant.liked) {
+        attachRestaurant(restaurant);
+    } else {
+        detachRestaurant(restaurant);
+    }
 }
 
-// restaurantsの各オブジェクトにlikedプロパティを追加
+const reactiveRestaurants = ref([]);
+
 onMounted(() => {
-    props.restaurants.forEach(restaurant => {
-        restaurant.liked = false;
-    });
+    reactiveRestaurants.value = props.restaurants.map(restaurant => ({
+        ...restaurant,
+        liked: false
+    }));
 });
+
+const attachRestaurant = (restaurant) => {
+    Inertia.post(route('restaurants.attach', { restaurant: restaurant.id }), {}, {
+        onSuccess: () => {
+            // 応答を受け取った後にlikedプロパティを更新
+            restaurant.liked = true;
+            // const index = reactiveRestaurants.value.findIndex(r => r.id === restaurant.id);
+            // if (index !== -1) {
+            //     reactiveRestaurants.value[index].liked = true;
+            // }
+        }
+    });
+}
+
+const detachRestaurant = (restaurant) => {
+    Inertia.delete(route('restaurants.detach', { restaurant: restaurant.id }), {
+        onSuccess: () => {
+            // 応答を受け取った後にlikedプロパティを更新
+            restaurant.liked = false;
+            // const index = reactiveRestaurants.value.findIndex(r => r.id === restaurant.id);
+            // if (index !== -1) {
+            //     reactiveRestaurants.value[index].liked = false;
+            // }
+        }
+    });
+}
 
 </script>
 
@@ -101,7 +134,7 @@ onMounted(() => {
                         <section class="text-gray-600 body-font" v-if="!selectedRestaurant">
                             <div class="container px-5 py-24 mx-auto">
                                 <div class="flex flex-wrap -m-4">
-                                    <div class="p-4 md:w-1/3" v-for="restaurant in restaurants" :key="restaurant.id">
+                                    <div class="p-4 md:w-1/3" v-for="restaurant in reactiveRestaurants" :key="restaurant.id">
                                         <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                             <!-- 条件付きレンダリングで画像を表示 -->
                                             <img v-if="isValidImageUrl(restaurant.restaurant_image)" class="lg:h-48 md:h-36 w-full object-cover object-center" :src="'/storage/images/' + restaurant.restaurant_image" alt="restaurant image">

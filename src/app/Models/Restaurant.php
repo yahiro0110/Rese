@@ -58,11 +58,6 @@ class Restaurant extends Model
         return $this->belongsTo(Genre::class);
     }
 
-    public function scopeOfUser($query, $userId)
-    {
-        return $query->where('user_id', $userId);
-    }
-
     /**
      * 店舗に関連する予約情報を取得する。
      *
@@ -74,5 +69,27 @@ class Restaurant extends Model
     public function schedules()
     {
         return $this->hasMany(schedule::class);
+    }
+
+    /**
+     * 店舗に関連するユーザーのコレクションを取得します。
+     *
+     * このメソッドは多対多のリレーションシップを表し、関連するUserモデルのインスタンスのコレクションを返します。
+     * ユーザーと店舗は `restaurant_user` 中間テーブルを介して関連付けられています。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'restaurant_user');
+    }
+
+    // --------------------------------------------------------------------------------
+    // クエリスコープとカスタムメソッド
+    // --------------------------------------------------------------------------------
+
+    public function scopeOfUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 }

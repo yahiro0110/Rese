@@ -27,6 +27,8 @@ Route::resource('upload', UploadController::class);
 
 Route::resource('restaurants', RestaurantController::class)->middleware('auth', 'verified');
 Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->name('restaurants.formUpdate');
+Route::post('restaurants/{restaurant}/attach', [RestaurantController::class, 'attachFavorite'])->name('restaurants.attach');
+Route::delete('restaurants/{restaurant}/detach', [RestaurantController::class, 'detachFavorite'])->name('restaurants.detach');
 
 Route::resource('schedules', ScheduleController::class)->middleware('auth', 'verified');
 
