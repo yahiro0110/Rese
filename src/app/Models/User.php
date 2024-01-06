@@ -61,6 +61,19 @@ class User extends Authenticatable
     }
 
     /**
+     * ユーザーに関連する店舗のコレクションを取得します。
+     *
+     * このメソッドは多対多のリレーションシップを表し、関連するRestaurantモデルのインスタンスのコレクションを返します。
+     * ユーザーと店舗は `restaurant_user` 中間テーブルを介して関連付けられています。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function restaurants()
+    {
+        return $this->belongsToMany(Restaurant::class, 'restaurant_user');
+    }
+
+    /**
      * ユーザーに関連する予約情報を取得する。
      *
      * このメソッドは一対多のリレーションシップを表し、関連するScheduleモデルのインスタンスのコレクションを返す。

@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateRestaurantRequest;
 use App\Models\Genre;
 use App\Models\Prefecture;
 use App\Models\Restaurant;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -22,10 +21,16 @@ class RestaurantController extends Controller
      */
     public function home()
     {
+        $userId = Auth::id();
+        // 全ての店舗情報を取得し、
+        // 各店舗に対して、現在のユーザーと紐づいているかどうかの情報も取得
+        $restaurants = Restaurant::with('genre', 'prefecture')
+            ->withUserAttached($userId)
+            ->get();
         return Inertia::render(
             'Home',
             [
-                'restaurants' => Restaurant::with('genre', 'prefecture')->get(),
+                'restaurants' => $restaurants,
             ]
         );
     }
@@ -187,6 +192,50 @@ class RestaurantController extends Controller
         } catch (\Exception $e) {
             return to_route('restaurants.index')->with([
                 'message' => '店舗の削除に失敗しました。',
+                'status' => 'warning',
+            ]);
+        }
+    }
+
+    /**
+     * 指定された店舗を現在認証されているユーザーのお気に入りに登録する。
+     *
+     * 登録処理中に例外が発生した場合は、ホームページへリダイレクトし、
+     * エラーメッセージを含む警告通知を表示する。
+     *
+     * @param Restaurant $restaurant お気に入りに登録する店舗のインスタンス
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector 登録に失敗した場合のリダイレクトレスポンス
+     */
+    public function attachFavorite(Restaurant $restaurant)
+    {
+        try {
+            $restaurant->users()->attach(Auth::id());
+            return Inertia::render('Home');
+        } catch (\Exception $e) {
+            return to_route('home')->with([
+                'message' => 'お気に入り登録に失敗しました。',
+                'status' => 'warning',
+            ]);
+        }
+    }
+
+    /**
+     * 指定された店舗を現在認証されているユーザーのお気に入りリストから削除する。
+     *
+     * 削除処理中に例外が発生した場合は、ホームページへリダイレクトし、
+     * エラーメッセージを含む警告通知を表示する。
+     *
+     * @param Restaurant $restaurant お気に入りから削除する店舗のインスタンス
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector 削除に失敗した場合のリダイレクトレスポンス
+     */
+    public function detachFavorite(Restaurant $restaurant)
+    {
+        try {
+            $restaurant->users()->detach(Auth::id());
+            return Inertia::render('Home');
+        } catch (\Exception $e) {
+            return to_route('home')->with([
+                'message' => 'お気に入りからの削除に失敗しました。',
                 'status' => 'warning',
             ]);
         }

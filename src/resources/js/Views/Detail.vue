@@ -24,7 +24,7 @@ const props = defineProps({
  * イベントを発火させるためのemit関数を定義。
  * @property {Function} back - 'back'イベントを発火させる関数
  */
-const emit = defineEmits(['back']);
+const emit = defineEmits(['back', 'toggleLike']);
 
 /**
  * モーダルウィンドウの表示状態を管理するリアクティブな参照。
@@ -53,6 +53,13 @@ const closeModal = () => {
  */
 function emitBackEvent() {
     emit('back');
+}
+
+/**
+ * 'back'イベントを発火させる関数。
+ */
+function emitToggleLike(restaurant) {
+    emit('toggleLike', restaurant);
 }
 </script>
 
@@ -91,8 +98,8 @@ function emitBackEvent() {
                     </div>
                     <div class="flex">
                         <button @click="openModal" class="flex ml-auto text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">予約する</button>
-                        <button class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
-                            <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5" viewBox="0 0 24 24">
+                        <button @click="emitToggleLike(restaurant)" class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4" :class="{ 'bg-red-100': restaurant.liked }">
+                            <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5" viewBox="0 0 24 24" :class="{ 'text-red-500': restaurant.liked }">
                                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path>
                             </svg>
                         </button>
