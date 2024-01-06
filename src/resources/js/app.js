@@ -1,11 +1,11 @@
 import './bootstrap';
 import '../css/app.css';
+import 'preline';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/inertia-vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
-import('preline');
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
