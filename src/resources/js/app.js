@@ -1,6 +1,7 @@
 import './bootstrap';
 import '../css/app.css';
 import 'preline';
+import { HSStaticMethods } from 'preline/preline';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/inertia-vue3';
@@ -13,10 +14,12 @@ createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
-            .use(plugin)
+        const app = createApp({ render: () => h(App, props) })
+        app.config.globalProperties.$HSStaticMethods = HSStaticMethods;
+        app.use(plugin)
             .use(ZiggyVue, Ziggy)
             .mount(el);
+        return app;
     },
     progress: {
         color: '#4B5563',
