@@ -168,7 +168,7 @@ const updateSchedule = (id) => {
 
 <template>
     <section id="overlay" class="text-gray-600 body-font relative">
-        <div id="content" class="container px-5 py-24">
+        <div id="content" class="container px-5 py-24 animate-flip-in-diag-1-bl">
             <p class="text-right"><button @click='closeModal'>close</button></p>
             <form @submit.prevent="handleSubmit">
                 <div class="md:w-2/3 bg-white rounded-lg md:p-8 flex flex-col w-full mt-0 md:mt-5 relative z-10 mx-auto">

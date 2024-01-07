@@ -4,6 +4,7 @@
  * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
  * @requires Inertia - @inertiajs/inertiaパッケージからインポート。SPA(Single Page Application)のような体験を提供するための
  *                     クライアントサイドのページ遷移やサーバーとのデータ送受信を行うライブラリの主要オブジェクト
+ * @requires getCurrentInstance - 現在アクティブなVueコンポーネントインスタンスを取得するために使用。setup関数内でのみ呼び出すことができる
  * @requires onMounted - Vueコンポーネントがマウントされた後に実行する処理を定義するために使用
  * @requires ref - リアクティブなデータ参照を作成するために使用
  * @requires Detail - 店舗詳細情報を表示するためのVueコンポーネント
@@ -67,11 +68,25 @@ const selectRestaurant = (restaurant) => {
 }
 
 /**
+ * コンテナのアニメーション状態を管理するリアクティブな参照。
+ * 初期値はfalseで、アニメーションが非アクティブを意味する。
+ *
+ * @type {Ref<boolean>} - アニメーションの有効/無効状態を保持するリアクティブな参照
+ */
+const containerAnimation = ref(false);
+
+/**
  * 店舗選択をクリアする関数。
- * selectedRestaurantをnullに設定し、選択された店舗情報をリセットする。
+ * 選択された店舗情報をリセットし、関連するアニメーションをトリガーする。
+ * selectedRestaurantをnullに設定して選択状態をクリアし、コンテナのアニメーション状態をtrueに設定してアニメーションを開始する。
+ * 1000ミリ秒（1秒）後に、アニメーション状態をfalseに戻してアニメーションを終了させる。
  */
 const clearSelectedRestaurant = () => {
     selectedRestaurant.value = null;
+    // アニメーションをトリガー
+    containerAnimation.value = true;
+    // 1000ミリ秒後にアニメーションをリセット
+    setTimeout(() => containerAnimation.value = false, 1000);
 }
 
 /**
@@ -93,6 +108,11 @@ const isValidImageUrl = (url) => {
  */
 const reactiveRestaurants = ref([]);
 
+/**
+ * コンポーネントがマウントされた際に、propsから取得した店舗情報でreactiveRestaurantsを初期化する。
+ * 各店舗オブジェクトに 'liked' プロパティを追加し、ユーザーが店舗をお気に入りにしているかどうかを表す。
+ * 'liked' プロパティは、ユーザーが店舗をお気に入りにしている場合はtrue、そうでない場合はfalseとなる。
+ */
 onMounted(() => {
     reactiveRestaurants.value = props.restaurants.map(restaurant => ({
         ...restaurant,
@@ -168,7 +188,7 @@ const detachRestaurant = (restaurant) => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                         <FlashMessage />
-                        <section class="text-gray-600 body-font" v-show="!selectedRestaurant">
+                        <section class="text-gray-600 body-font" v-show="!selectedRestaurant" :class="{ 'animate-flash': containerAnimation }">
                             <div class="container px-5 py-4 mx-auto">
                                 <div class="pb-6 sm:flex justify-end rounded-lg">
                                     <!-- Select -->
@@ -182,7 +202,7 @@ const detachRestaurant = (restaurant) => {
                                                 "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"hidden hs-selected:block\"><svg class=\"flex-shrink-0 w-3.5 h-3.5 text-blue-600 dark:text-blue-500\" xmlns=\"http:.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"/></svg></span></div>"
                                             }' class="hidden">
                                             <option value="">Choose</option>
-                                            <option v-for="prefecture in prefectures" :key="prefecture.id" :value="prefecture.id">{{ prefecture.name }}</option>
+                                            <option v-for="   prefecture    in    prefectures   " :key="prefecture.id" :value="prefecture.id">{{ prefecture.name }}</option>
                                         </select>
                                         <div class="absolute top-1/2 end-3 -translate-y-1/2">
                                             <svg class="flex-shrink-0 w-3.5 h-3.5 text-gray-500 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -201,7 +221,7 @@ const detachRestaurant = (restaurant) => {
                                                 "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"hidden hs-selected:block\"><svg class=\"flex-shrink-0 w-3.5 h-3.5 text-blue-600 dark:text-blue-500\" xmlns=\"http:.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"/></svg></span></div>"
                                             }' class="hidden">
                                             <option value="">Choose</option>
-                                            <option v-for="genre in genres" :key="genre.id" :value="genre.id">{{ genre.name }}</option>
+                                            <option v-for="   genre    in    genres   " :key="genre.id" :value="genre.id">{{ genre.name }}</option>
                                         </select>
                                         <div class="absolute top-1/2 end-3 -translate-y-1/2">
                                             <svg class="flex-shrink-0 w-3.5 h-3.5 text-gray-500 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -222,7 +242,7 @@ const detachRestaurant = (restaurant) => {
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap -m-4">
-                                    <div class="p-4 md:w-1/3" v-for="restaurant in reactiveRestaurants" :key="restaurant.id">
+                                    <div class="p-4 md:w-1/3" v-for="   restaurant    in    reactiveRestaurants   " :key="restaurant.id">
                                         <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                             <!-- 条件付きレンダリングで画像を表示 -->
                                             <img v-if="isValidImageUrl(restaurant.restaurant_image)" class="lg:h-48 md:h-36 w-full object-cover object-center" :src="'/storage/images/' + restaurant.restaurant_image" alt="restaurant image">
