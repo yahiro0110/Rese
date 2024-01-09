@@ -31,6 +31,8 @@ class RestaurantController extends Controller
             'Home',
             [
                 'restaurants' => $restaurants,
+                'genres' => Genre::select('id', 'name')->get(),
+                'prefectures' => Prefecture::select('id', 'name')->get(),
             ]
         );
     }
@@ -210,7 +212,7 @@ class RestaurantController extends Controller
     {
         try {
             $restaurant->users()->attach(Auth::id());
-            return Inertia::render('Home');
+            return to_route('home');
         } catch (\Exception $e) {
             return to_route('home')->with([
                 'message' => 'お気に入り登録に失敗しました。',
@@ -232,7 +234,7 @@ class RestaurantController extends Controller
     {
         try {
             $restaurant->users()->detach(Auth::id());
-            return Inertia::render('Home');
+            return to_route('home');
         } catch (\Exception $e) {
             return to_route('home')->with([
                 'message' => 'お気に入りからの削除に失敗しました。',
