@@ -4,6 +4,7 @@
  * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
  * @requires Inertia - @inertiajs/inertiaパッケージからインポート。SPA(Single Page Application)のような体験を提供するための
  *                     クライアントサイドのページ遷移やサーバーとのデータ送受信を行うライブラリの主要オブジェクト
+ * @requires computed - Vueコンポーネントの算出プロパティを定義するために使用
  * @requires getCurrentInstance - 現在アクティブなVueコンポーネントインスタンスを取得するために使用。setup関数内でのみ呼び出すことができる
  * @requires onMounted - Vueコンポーネントがマウントされた後に実行する処理を定義するために使用
  * @requires ref - リアクティブなデータ参照を作成するために使用
@@ -13,7 +14,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
 import { Inertia } from '@inertiajs/inertia';
-import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 import Detail from '@/Views/Detail.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 
@@ -32,6 +33,8 @@ onMounted(() => {
  *
  * @property {Object} errors - エラーメッセージを含むオブジェクト
  * @property {Array} restaurants - 店舗の情報を含むオブジェクトの配列
+ * @property {Array} genres - 店舗のジャンル情報を含むオブジェクトの配列
+ * @property {Array} prefectures - 店舗の都道府県情報を含むオブジェクトの配列
  */
 const props = defineProps({
     errors: Object,
@@ -40,53 +43,99 @@ const props = defineProps({
     prefectures: Array,
 });
 
+/**
+ * 都道府県とジャンルの各selectタグで選択された値を保持するリアクティブな参照。
+ * ユーザーがフィルタ条件を選択すると、span.truncate要素の参照が更新される。
+ *
+ * @type {Ref<string>} prefectureElement - 都道府県の選択値を保持するリアクティブな参照
+ * @type {Ref<string>} genreElement - ジャンルの選択値を保持するリアクティブな参照
+ */
+const prefectureElement = ref('');
+const genreElement = ref('');
+
+/**
+ * 都道府県とジャンルの選択値を追跡するためのリアクティブな参照を設定し、
+ * DOM要素の変更を監視してそれに応じてフィルタキーを更新する。
+ * setTimeoutを使用して３秒後にDOM要素が利用可能になるのを待ち、MutationObserverをセットアップして
+ * 都道府県とジャンルの選択値が変更された場合に反応する。
+ *
+ * @type {Ref<string>} prefectureElement - 都道府県の選択値を保持するリアクティブな参照。
+ * @type {Ref<string>} genreElement - ジャンルの選択値を保持するリアクティブな参照。
+ */
+setTimeout(() => {
+    // 都道府県とジャンルの選択値を保持するDOM要素への参照を設定
+    prefectureElement.value = document.querySelector('div#preferenceId span.truncate');
+    genreElement.value = document.querySelector('div#genreId span.truncate');
+
+    // MutationObserverのセットアップ。DOM要素の変更を監視して、フィルタキーを更新
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                // 変更があった際の処理
+                prefectureFilterKey.value = prefectureElement.value.textContent;
+                genreFilterKey.value = genreElement.value.textContent;
+                // 'なし'を選択した場合はプレースホルダーを設定
+                if (prefectureElement.value.textContent === 'なし') {
+                    prefectureElement.value.textContent = 'エリア選択...';
+                }
+                if (genreElement.value.textContent === 'なし') {
+                    genreElement.value.textContent = 'カテゴリ選択...';
+                }
+            }
+        });
+    });
+
+    // DOM要素の監視を開始
+    if (prefectureElement.value) {
+        observer.observe(prefectureElement.value, { characterData: true, childList: true });
+    }
+    if (genreElement.value) {
+        observer.observe(genreElement.value, { characterData: true, childList: true });
+    }
+}, 3000);
+
+/**
+ * 各フィルタ条件を保持するリアクティブな参照。
+ * 初期値はfalseもしくは空文字列で、ユーザーがフィルタ条件を選択すると更新される。
+ *
+ * @type {Ref<boolean>} favoriteOnly - お気に入りのみを表示するかどうかを保持するリアクティブな参照
+ * @type {Ref<string>} prefectureFilterKey - 都道府県のフィルタ条件を保持するリアクティブな参照
+ * @type {Ref<string>} genreFilterKey - ジャンルのフィルタ条件を保持するリアクティブな参照
+ * @type {Ref<string>} restaurantNameFilterKey - 店舗名のフィルタ条件を保持するリアクティブな参照
+ */
+const favoriteOnly = ref(false);
+const prefectureFilterKey = ref('');
+const genreFilterKey = ref('');
 const restaurantNameFilterKey = ref('');
 
-const prefectureFilterKey = ref('');
+/**
+ * フィルタ関数。
+ * フィルタ条件に基づいて、店舗情報をフィルタリングする。
+ *
+ * @param {Array} restaurants - フィルタリングする店舗情報の配列
+ * @returns {Array} - フィルタリングされた店舗情報の配列
+ */
+const filterByFavorite = (restaurants) => favoriteOnly.value ? restaurants.filter(restaurant => restaurant.liked) : restaurants;
+const filterByPrefecture = (restaurants) => prefectureFilterKey.value && prefectureFilterKey.value !== 'エリア選択...' ? restaurants.filter(restaurant => restaurant.prefecture.name.includes(prefectureFilterKey.value)) : restaurants;
+const filterByGenre = (restaurants) => genreFilterKey.value && genreFilterKey.value !== 'カテゴリ選択...' ? restaurants.filter(restaurant => restaurant.genre.name.includes(genreFilterKey.value)) : restaurants;
+const filterByName = (restaurants) => restaurantNameFilterKey.value ? restaurants.filter(restaurant => restaurant.name.toLowerCase().includes(restaurantNameFilterKey.value.toLowerCase())) : restaurants;
 
-const genreFilterKey = ref('');
-
-// reactiveRestaurantsをフィルタリングするcomputedプロパティ
+/**
+ * フィルタされた店舗情報を保持するリアクティブな参照。
+ * フィルタ条件に基づいて、filteredRestaurantsを更新する。
+ *
+ * @type {Ref<Array>} - フィルタされた店舗情報の配列
+ */
 const filteredRestaurants = computed(() => {
-    if (prefectureFilterKey.value === '' && genreFilterKey.value === '' && restaurantNameFilterKey.value === '') {
-        return reactiveRestaurants.value;
-    }
-
-    let filteredPrefecture = [];
-    let filteredGenre = [];
-    let filteredName = [];
-
-    if (prefectureFilterKey.value === '' || prefectureFilterKey.value === 'エリア選択...') {
-        filteredPrefecture = reactiveRestaurants.value;
-    } else {
-        filteredPrefecture = reactiveRestaurants.value.filter(restaurant =>
-            restaurant.prefecture.name.includes(prefectureFilterKey.value)
-        );
-        if (!filteredPrefecture) {
-            return filteredPrefecture;
-        }
-    }
-
-    if (genreFilterKey.value === '' || genreFilterKey.value === 'カテゴリ選択...') {
-        filteredGenre = filteredPrefecture;
-    } else {
-        filteredGenre = filteredPrefecture.filter(restaurant =>
-            restaurant.genre.name.includes(genreFilterKey.value)
-        );
-        if (!filteredGenre) {
-            return filteredGenre;
-        }
-    }
-
-    if (restaurantNameFilterKey.value === '') {
-        return filteredGenre;
-    }
-
-    filteredName = filteredGenre.filter(restaurant =>
-        restaurant.name.toLowerCase().includes(restaurantNameFilterKey.value.toLowerCase())
-    );
-
-    return (filteredName.length > 0) ? filteredName : filteredGenre;
+    let filtered = reactiveRestaurants.value;
+    // フィルタ条件（お気に入り、都道府県、カテゴリ）に基づいて、店舗情報をフィルタリング
+    // もしフィルタ結果が空の場合は、早期リターンする
+    if (!(filtered = filterByFavorite(filtered)).length) return filtered;
+    if (!(filtered = filterByPrefecture(filtered)).length) return filtered;
+    if (!(filtered = filterByGenre(filtered)).length) return filtered;
+    // 店舗名のフィルタ条件に基づいて、店舗情報をフィルタリングし、フィルタ結果を返す
+    // もしフィルタ結果が空の場合は、フィルタ条件（お気に入り、都道府県、カテゴリ）でフィルタリングした結果を返す
+    return (!filterByName(filtered).length) ? filtered : filterByName(filtered);
 });
 
 /**
@@ -219,40 +268,6 @@ const detachRestaurant = (restaurant) => {
         }
     );
 }
-
-const prefectureElement = ref('');
-
-const genreElement = ref('');
-
-setTimeout(() => {
-    prefectureElement.value = document.querySelector('div#preferenceId span.truncate');
-    genreElement.value = document.querySelector('div#genreId span.truncate');
-
-    // MutationObserverをセットアップ
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'characterData' || mutation.type === 'childList') {
-                prefectureFilterKey.value = prefectureElement.value.textContent;
-                genreFilterKey.value = genreElement.value.textContent;
-                if (prefectureElement.value.textContent === 'なし') {
-                    prefectureElement.value.textContent = 'エリア選択...';
-                }
-                if (genreElement.value.textContent === 'なし') {
-                    genreElement.value.textContent = 'カテゴリ選択...';
-                }
-            }
-        });
-    });
-
-    // 監視を開始
-    if (prefectureElement.value) {
-        observer.observe(prefectureElement.value, { characterData: true, childList: true });
-    }
-
-    if (genreElement.value) {
-        observer.observe(genreElement.value, { characterData: true, childList: true });
-    }
-}, 3000);
 </script>
 
 <template>
@@ -274,6 +289,10 @@ setTimeout(() => {
                         <section class="text-gray-600 body-font" v-show="!selectedRestaurant" :class="{ 'animate-flash': containerAnimation }">
                             <div class="container px-5 py-4 mx-auto">
                                 <!-- search form -->
+                                <div class="flex">
+                                    <input type="checkbox" v-model="favoriteOnly" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" id="hs-default-checkbox">
+                                    <label for="hs-default-checkbox" class="text-sm text-gray-500 ms-3">お気に入り店舗のみを表示する</label>
+                                </div>
                                 <div class="pb-6 sm:flex justify-end rounded-lg">
                                     <!-- Select -->
                                     <div class="relative" id="preferenceId">
@@ -328,7 +347,7 @@ setTimeout(() => {
                                     </div>
                                 </div>
                                 <!-- End search form -->
-                                <!-- restaurant index area -->
+                                <!-- restaurant notfound area -->
                                 <div v-show="filteredRestaurants.length === 0" class="p-8">
                                     <div class="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4" role="alert">
                                         <div class="flex w-full h-96">
@@ -341,7 +360,7 @@ setTimeout(() => {
                                             </div>
                                             <div class="ms-3">
                                                 <h3 class="text-lg font-semibold">
-                                                    選択したエリア、カテゴリに該当する店舗は見つかりませんでした。
+                                                    お気に入り、選択したエリアおよびカテゴリに該当する店舗は見つかりませんでした。
                                                 </h3>
                                                 <div class="mt-1 text-base text-yellow-700">
                                                     選択条件を変更して再度検索してください。
@@ -350,6 +369,7 @@ setTimeout(() => {
                                         </div>
                                     </div>
                                 </div>
+                                <!-- restaurant index area -->
                                 <div class="flex flex-wrap -m-4">
                                     <div class="p-4 md:w-1/3" v-for="restaurant in filteredRestaurants" :key="restaurant.id">
                                         <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
