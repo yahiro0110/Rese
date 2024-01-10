@@ -16,7 +16,7 @@ class RoleSeeder extends Seeder
     public function run()
     {
         // 初期データの定義（シンプルな文字列リスト）
-        $initialRoleNames = ['管理者', '店舗代表者', '利用者'];
+        $initialRoleNames = ['admin', 'manager', 'user'];
 
         // 配列を変換して一括挿入
         $initialRoles = array_map(function ($name) {

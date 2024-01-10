@@ -31,7 +31,7 @@ const showingNavigationDropdown = ref(false);
                                     ホーム
                                 </NavLink>
                             </div>
-                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex" v-show="$page.props.loginUser.roles.some(role => role.name === '店舗代表者')">
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex" v-show="$page.props.loginUser.roles.some(role => role.name === 'manager')">
                                 <NavLink :href="route('restaurants.index')" :active="route().current('restaurants.index')">
                                     店舗情報
                                 </NavLink>
@@ -41,7 +41,7 @@ const showingNavigationDropdown = ref(false);
                                     予約情報
                                 </NavLink>
                             </div>
-                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex" v-show="$page.props.loginUser.roles.some(role => role.name === '管理者')">
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex" v-show="$page.props.loginUser.roles.some(role => role.name === 'admin')">
                                 <NavLink :href="route('users.index')" :active="route().current('users.index')">
                                     ユーザ情報
                                 </NavLink>

@@ -4,6 +4,7 @@ import { Head } from '@inertiajs/inertia-vue3';
 import { reactive } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 import InputError from '@/Components/InputError.vue';
+import { getRoleDisplayName } from '@/Commons/disprayRoleName.js';
 
 const props = defineProps({
     errors: Object,
@@ -46,33 +47,27 @@ const updateUser = (id) => {
                                             <div class="p-2 w-full">
                                                 <div class="relative">
                                                     <label for="name" class="leading-7 text-sm text-gray-600">名前</label>
-                                                    <input type="text" id="name" name="name" v-model="form.name"
-                                                        class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                                    <input type="text" id="name" name="name" v-model="form.name" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                                     <InputError class="p-1" :message="errors.name" />
                                                 </div>
                                             </div>
                                             <div class="p-2 w-full">
                                                 <div class="relative">
-                                                    <label for="email"
-                                                        class="leading-7 text-sm text-gray-600">メールアドレス</label>
-                                                    <input type="email" id="email" name="email" v-model="form.email"
-                                                        class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                                    <label for="email" class="leading-7 text-sm text-gray-600">メールアドレス</label>
+                                                    <input type="email" id="email" name="email" v-model="form.email" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                                     <InputError class="p-1" :message="errors.email" />
                                                 </div>
                                             </div>
                                             <div class="p-2 w-full">
                                                 <label for="email" class="leading-7 text-sm text-gray-600">役割</label>
-                                                <div class="relative flex items-center" v-for="role in roles"
-                                                    :key="role.id">
-                                                    <input type="checkbox" :id="`role-${role.id}`"
-                                                        v-model="form.roles[role.id]">
-                                                    <label :for="`role-${role.id}`" class="ml-2">{{ role.name }}</label>
+                                                <div class="relative flex items-center" v-for="role in roles" :key="role.id">
+                                                    <input type="checkbox" :id="`role-${role.id}`" v-model="form.roles[role.id]">
+                                                    <label :for="`role-${role.id}`" class="ml-2">{{ getRoleDisplayName(role.name) }}</label>
                                                 </div>
                                                 <InputError class="p-1" :message="errors.roles" />
                                             </div>
                                             <div class="p-2 w-full">
-                                                <button
-                                                    class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新する</button>
+                                                <button class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新する</button>
                                             </div>
                                         </div>
                                     </div>

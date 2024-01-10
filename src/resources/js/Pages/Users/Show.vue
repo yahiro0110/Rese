@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/inertia-vue3';
 // import { nl2br } from '@/common';
 import { Inertia } from '@inertiajs/inertia';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import { getRoleDisplayName } from '@/Commons/disprayRoleName.js';
 
 const props = defineProps({
     user: Object,
@@ -36,8 +37,7 @@ const deleteUser = (id) => {
                                         <div class="p-2 w-full">
                                             <div class="relative">
                                                 <label for="email" class="leading-7 text-sm text-gray-600">メールアドレス</label>
-                                                <div id="email"
-                                                    class="w-full bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                                <div id="email" class="w-full bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                                     {{ user.email }}
                                                 </div>
                                             </div>
@@ -45,20 +45,17 @@ const deleteUser = (id) => {
                                         <div class="p-2 w-full">
                                             <div class="relative">
                                                 <label for="role" class="leading-7 text-sm text-gray-600">役割</label>
-                                                <ul
-                                                    class="w-full bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                                    <li v-for=" role in user.roles" :key="role.id">{{ role.name }}</li>
+                                                <ul class="w-full bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                                    <li v-for=" role in user.roles" :key="role.id">{{ getRoleDisplayName(role.name) }}</li>
                                                 </ul>
                                             </div>
                                         </div>
                                         <div class="p-2 w-full">
                                             <div class="mt-4 flex justify-center">
-                                                <Link as="button" :href="route('users.edit', { user: user.id })"
-                                                    class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg mx-2">
+                                                <Link as="button" :href="route('users.edit', { user: user.id })" class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg mx-2">
                                                 編集する
                                                 </Link>
-                                                <button @click="deleteUser(user.id)"
-                                                    class="text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg mx-2">
+                                                <button @click="deleteUser(user.id)" class="text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg mx-2">
                                                     削除する
                                                 </button>
                                             </div>

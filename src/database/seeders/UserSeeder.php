@@ -40,10 +40,13 @@ class UserSeeder extends Seeder
             // ロールデータを取得する
             $roles = Role::all();
 
-            // ユーザにランダムなロールを割り当てる
-            $user->roles()->attach(
-                $roles->random(rand(1, $roles->count()))->pluck('id')->toArray()
-            );
+            if ($userData['name'] === 'マネージャ') {
+                // マネージャーには全てのロールを割り当てる
+                $user->roles()->attach($roles->pluck('id')->toArray());
+            } else {
+                // スタッフにはランダムな3つのロールを割り当てる
+                $user->roles()->attach($roles->find(3));
+            }
         }
 
         // ファクトリーを使った追加データの生成

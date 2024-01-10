@@ -20,17 +20,23 @@ use Inertia\Inertia;
 |
 */
 
-Route::resource('users', UserController::class)->middleware('auth', 'verified');
+Route::resource('users', UserController::class)->middleware(['role:admin'], 'auth', 'verified');
 
 // TODO: 検証用で設定したルートなのであとで削除する
 Route::resource('upload', UploadController::class);
 
-Route::resource('restaurants', RestaurantController::class)->middleware('auth', 'verified');
-Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->name('restaurants.formUpdate');
-Route::post('restaurants/{restaurant}/attach', [RestaurantController::class, 'attachFavorite'])->name('restaurants.attach');
-Route::delete('restaurants/{restaurant}/detach', [RestaurantController::class, 'detachFavorite'])->name('restaurants.detach');
+Route::resource('restaurants', RestaurantController::class)->middleware(['role:manager'], 'auth', 'verified');
+Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->middleware(['role:manager'], 'auth', 'verified')->name('restaurants.formUpdate');
+Route::post('restaurants/{restaurant}/attach', [RestaurantController::class, 'attachFavorite'])->middleware('auth', 'verified')->name('restaurants.attach');
+Route::delete('restaurants/{restaurant}/detach', [RestaurantController::class, 'detachFavorite'])->middleware('auth', 'verified')->name('restaurants.detach');
 
 Route::resource('schedules', ScheduleController::class)->middleware('auth', 'verified');
+
+Route::get('caution/{role}', function ($role) {
+    return Inertia::render('Caution', [
+        'role' => $role,
+    ]);
+})->name('caution');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
