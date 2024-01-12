@@ -24,11 +24,11 @@ defineProps({
 /**
  * 画像が見つからない場合に表示されるデフォルトの画像パス。
  * この変数は、指定された画像リソースが存在しない、またはアクセスできない場合に使用される。
- * '/storage/images/notfound.jpeg' への相対パスを指定している。
+ * '/storage/images/notfound.png' への相対パスを指定している。
  *
  * @type {string} - 画像が見つからない場合のデフォルト画像のファイルパス
  */
-const notfoundImage = '/images/notfound.jpeg';
+const notfoundImage = '/images/notfound.png';
 
 /**
  * 与えられたURLが有効な画像URLであるかどうかを判定する関数。
