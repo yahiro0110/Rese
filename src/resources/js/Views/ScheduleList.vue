@@ -101,9 +101,17 @@ const closeModal = () => {
 
 #content {
     z-index: 2;
-    height: 50%;
-    width: 50%;
+    height: 100%;
+    width: 100%;
     padding: 1em;
     background: #fff;
+}
+
+/* mdサイズ以上（768px以上）の場合に適用されるスタイル */
+@media (min-width: 768px) {
+    #content {
+        height: 50%;
+        width: 50%;
+    }
 }
 </style>
