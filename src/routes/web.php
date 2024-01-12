@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,6 +19,21 @@ use Inertia\Inertia;
 |
 */
 
+Route::resource('users', UserController::class)->middleware(['role:admin'], 'auth', 'verified');
+
+Route::resource('restaurants', RestaurantController::class)->middleware(['role:manager'], 'auth', 'verified');
+Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->middleware(['role:manager'], 'auth', 'verified')->name('restaurants.formUpdate');
+Route::post('restaurants/{restaurant}/attach', [RestaurantController::class, 'attachFavorite'])->middleware('auth', 'verified')->name('restaurants.attach');
+Route::delete('restaurants/{restaurant}/detach', [RestaurantController::class, 'detachFavorite'])->middleware('auth', 'verified')->name('restaurants.detach');
+
+Route::resource('schedules', ScheduleController::class)->middleware('auth', 'verified');
+
+Route::get('caution/{role}', function ($role) {
+    return Inertia::render('Caution', [
+        'role' => $role,
+    ]);
+})->name('caution');
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -23,11 +41,11 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('welcome');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/home', [RestaurantController::class, 'home'])
+    ->middleware(['auth', 'verified'])
+    ->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -35,4 +53,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

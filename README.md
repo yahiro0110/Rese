@@ -5,10 +5,6 @@
 PHP のフレームワーク Laravel で作成された Web アプリケーション（飲食店予約サービス）です。<br />
 アプリケーションの詳細は Notion でまとめておりますので、[そちら](https://h-yamasita.notion.site/Rese-d233d1ed442f41aa9402e8e2fc0822af?pvs=4) をご覧ください。
 
-## Architecture
-
-![](./img/architecture.drawio.svg)
-
 ## Requirement
 
 -   nginx: latest
@@ -22,7 +18,7 @@ PHP のフレームワーク Laravel で作成された Web アプリケーシ�
 1.  リポジトリをクローンします。
 
     ```bash
-    git clone git@github.com:yahiro0110/LaraBreezeDockerKit.git
+    git clone https://github.com/yahiro0110/Rese.git
     ```
 
 2.  環境変数用のファイルを用意します。
@@ -31,15 +27,24 @@ PHP のフレームワーク Laravel で作成された Web アプリケーシ�
     cp ./src/.env.example ./src/.env
     ```
 
-3.  .env ファイル内のデータベース接続設定を次のように書きかえてください。
+3.  .env ファイル内のデータベース接続設定およびメール設定を次のように書きかえてください。
 
     ```markdown
     DB_CONNECTION=mysql
     DB_HOST=db
     DB_PORT=3306
-    DB_DATABASE=mysql_db
+    DB_DATABASE=Rese_db
     DB_USERNAME=admin
-    DB_PASSWORD=secret
+    DB_PASSWORD=password123
+
+    MAIL_MAILER=smtp
+    MAIL_HOST=mail
+    MAIL_PORT=1025
+    MAIL_USERNAME=null
+    MAIL_PASSWORD=null
+    MAIL_ENCRYPTION=null
+    MAIL_FROM_ADDRESS="rese@example.com"
+    MAIL_FROM_NAME="${APP_NAME}"
     ```
 
 4.  Docker コンテナを起動します。
@@ -60,6 +65,12 @@ PHP のフレームワーク Laravel で作成された Web アプリケーシ�
     # アプリケーションキーの生成
     php artisan key:generate
 
+    # データベーステーブルの作成
+    php artisan migrate
+
+    # 初期データの投入
+    php artisan db:seed
+
     # npmのインストール
     npm install
 
@@ -67,30 +78,30 @@ PHP のフレームワーク Laravel で作成された Web アプリケーシ�
     npm run dev
     ```
 
-6.  以下の URL にアクセスし、ログイン画面を表示します。
+6.  以下の URL にアクセスし、トップページを表示します。
 
--   ログイン画面 (マネージャー用) http://localhost/login/manager
+    http://localhost/
 
-    -   メールアドレス：manager@example.com
-    -   パスワード：password-manager
+    -   ログイン用アカウントの情報(Email, Password)
+        -   マネージャ
+            -   Email: manager@example.com
+            -   Password: manager123
+        -   スタッフ
+            -   Email: staff@example.com
+            -   Password: staff123
 
--   ログイン画面 (スタッフ用) http://localhost/login
+## Connection
 
-    -   メールアドレス：staff@example.com
-    -   パスワード：password-staff
+1. PhpMyAdmin
 
-7. もしアカウントを新規で登録したい場合は以下の URL にアクセスしてください。
+    http://localhost:8080/
 
--   新規登録画面 (マネージャー用) http://localhost/register/manager
--   新規登録画面 (スタッフ用) http://localhost/register
+    DB 関連の情報を閲覧できます。
 
-## Changelog
+2. MailHog
 
-<details>
-<summary>更新内容はこちら</summary>
+    http://localhost:8025/
 
-### 1.0.0 （2023/09/25）
-
--   初回登録
-
-</details>
+    ローカルでの開発環境に MailHog を使用しています。<br />
+    本アプリでアカウントを新規登録した場合、アカウントを使用可能にするためには認証メールのリンクをクリックする必要があります。
+    認証メールは MailHog に送られますので、上記の URL からアクセスし、Inbox をご確認ください。
