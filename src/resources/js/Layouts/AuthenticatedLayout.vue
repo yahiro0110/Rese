@@ -31,14 +31,14 @@ const showingNavigationDropdown = ref(false);
                                     ホーム
                                 </NavLink>
                             </div>
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink :href="route('schedules.index')" :active="route().current('schedules.index')">
+                                    予約状況
+                                </NavLink>
+                            </div>
                             <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex" v-show="$page.props.loginUser.roles.some(role => role.name === 'manager')">
                                 <NavLink :href="route('restaurants.index')" :active="route().current('restaurants.index')">
                                     店舗情報
-                                </NavLink>
-                            </div>
-                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink :href="route('schedules.index')" :active="route().current('schedules.index')">
-                                    予約情報
                                 </NavLink>
                             </div>
                             <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex" v-show="$page.props.loginUser.roles.some(role => role.name === 'admin')">
@@ -102,13 +102,13 @@ const showingNavigationDropdown = ref(false);
                         </ResponsiveNavLink>
                     </div>
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('restaurants.index')" :active="route().current('restaurants.index')" v-show="$page.props.loginUser.roles.some(role => role.name === '店舗代表者')">
-                            店舗情報
+                        <ResponsiveNavLink :href="route('schedules.index')" :active="route().current('schedules.index')">
+                            予約状況
                         </ResponsiveNavLink>
                     </div>
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('schedules.index')" :active="route().current('schedules.index')">
-                            予約情報
+                        <ResponsiveNavLink :href="route('restaurants.index')" :active="route().current('restaurants.index')" v-show="$page.props.loginUser.roles.some(role => role.name === '店舗代表者')">
+                            店舗情報
                         </ResponsiveNavLink>
                     </div>
                     <div class="pt-2 pb-3 space-y-1">
