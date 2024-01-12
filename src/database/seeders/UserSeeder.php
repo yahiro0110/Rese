@@ -22,12 +22,14 @@ class UserSeeder extends Seeder
             [
                 'name' => 'マネージャ',
                 'email' => 'manager@example.com',
-                'password' => Hash::make('manager123')
+                'password' => Hash::make('manager123'),
+                'email_verified_at' => now(),
             ],
             [
                 'name' => 'スタッフ',
                 'email' => 'staff@example.com',
-                'password' => Hash::make('staff123')
+                'password' => Hash::make('staff123'),
+                'email_verified_at' => now(),
             ]
         ];
 
