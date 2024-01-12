@@ -27,11 +27,27 @@ class Schedule extends Model
      */
     protected $fillable = ['date', 'time', 'members', 'restaurant_id', 'user_id'];
 
+    /**
+     * 予約に関連する店舗を取得する。
+     *
+     * このメソッドは一対多のリレーションシップを表し、関連するRestaurantモデルのインスタンスを返す。
+     * 予約は `restaurants` テーブルを介して店舗と関連付けられている。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);
     }
 
+    /**
+     * 予約に関連する予約者を取得する。
+     *
+     * このメソッドは一対多のリレーションシップを表し、関連するUserモデルのインスタンスを返す。
+     * 予約は `users` テーブルを介して予約者と関連付けられている。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
