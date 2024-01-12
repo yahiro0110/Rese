@@ -1,5 +1,5 @@
 /**
- * @requires computed - リアクティブなプロパティの計算やウォッチャーを作成するために使用
+ * @requires computed - コンポーネントの算出プロパティを作成するために使用
  * @requires ref - リアクティブなデータ参照を作成するために使用
  * @requires YubinBangoCore - yubinbango-core2ライブラリからインポート、日本の郵便番号から住所情報を取得する機能を提供
  */
