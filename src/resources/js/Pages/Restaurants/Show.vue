@@ -3,17 +3,18 @@
  * @requires AuthenticatedLayout - 認証済みユーザ用のレイアウトコンポーネント
  * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
  * @requires useForm - Inertia.jsのフォームハンドリング機能を提供し、フォームの状態管理や送信時の処理を容易にする
- * @requires watch - 指定されたリアクティブなデータソースの変更を監視し、
- *                   変更があった場合に指定されたコールバック関数を実行するために使用される
  * @requires Inertia - @inertiajs/inertiaパッケージからインポート。SPA(Single Page Application)のような体験を提供するための
  *                     クライアントサイドのページ遷移やサーバーとのデータ送受信を行うライブラリの主要オブジェクト
+ * @requires computed - Vueコンポーネント内で算出プロパティを定義するために使用
+ * @requires watch - 指定されたリアクティブなデータソースの変更を監視し、
+ *                   変更があった場合に指定されたコールバック関数を実行するために使用される
  * @requires InputError - フォーム入力エラーを表示するためのコンポーネント
  * @requires useRestaurantForm - 店舗フォームのカスタムフック機能を提供。フォームの検証やデータハンドリングを行う
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
 import { Inertia } from '@inertiajs/inertia';
-import { watch } from 'vue';
+import { computed, watch } from 'vue';
 import InputError from '@/Components/InputError.vue';
 import { useRestaurantForm } from '@/commons/useRestaurantForm'
 
@@ -88,6 +89,24 @@ const {
 } = useRestaurantForm(props, form);
 
 /**
+ * Googleマップの埋め込みURLを生成するcomputedプロパティ。
+ * 店舗の住所を基に、Googleマップの埋め込み用URLを返す。
+ * 環境変数からGoogle Maps APIキーを取得し、URLに組み込む。
+ *
+ * @returns {string} Googleマップの埋め込み用URL
+ */
+const googleMapUrl = computed(() => {
+    // Googleマップの基本URL
+    const baseMapUrl = 'https://www.google.com/maps/embed/v1/place';
+    // 環境変数からAPIキーを取得
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    // レストランの住所をURLエンコード
+    const address = encodeURIComponent(props.restaurant.address);
+    // 完成したURLを返す
+    return `${baseMapUrl}?key=${apiKey}&q=${address}`;
+});
+
+/**
  * form.addressの変更を監視し、都道府県IDを更新するウォッチャー。
  * form.addressが変更されるたびに、updatePrefectureId関数が呼び出される。
  * これにより、ユーザーが入力した住所に基づいて、適切な都道府県IDがフォームに設定される。
@@ -144,7 +163,8 @@ const deleteRestaurant = (id) => {
                             <div class="container px-5 py-24 mx-auto flex sm:flex-nowrap flex-wrap">
                                 <div class="lg:w-3/4 md:w-1/2 bg-gray-100 rounded-lg sm:mr-10 p-4 md:p-10">
                                     <div class="w-full bg-gray-300 rounded-lg overflow-hidden p-10 flex items-end justify-start relative">
-                                        <iframe width="100%" height="100%" class="absolute inset-0" frameborder="0" title="map" marginheight="0" marginwidth="0" scrolling="no" src="https://maps.google.com/maps?width=100%&height=600&hl=en&q=%C4%B0zmir+(My%20Business%20Name)&ie=UTF8&t=&z=14&iwloc=B&output=embed" style="filter: grayscale(1) contrast(1.2) opacity(0.4);"></iframe>
+                                        <!-- <iframe width="100%" height="100%" class="absolute inset-0" frameborder="0" title="map" marginheight="0" marginwidth="0" scrolling="no" src="https://maps.google.com/maps?width=100%&height=600&hl=en&q=%C4%B0zmir+(My%20Business%20Name)&ie=UTF8&t=&z=14&iwloc=B&output=embed" style="filter: grayscale(1) contrast(1.2) opacity(0.4);"></iframe> -->
+                                        <iframe width="100%" height="100%" class="absolute inset-0" frameborder="0" title="map" marginheight="0" marginwidth="0" scrolling="no" :src="googleMapUrl"></iframe>
                                         <div class="h-72"></div>
                                     </div>
                                     <div class="w-full bg-gray-100 rounded-lg sm:mr-10 p-4 md:p-10">

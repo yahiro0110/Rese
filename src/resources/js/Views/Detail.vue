@@ -1,12 +1,15 @@
 <script setup>
 /**
  * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
+ * @requires computed - Vueコンポーネント内で算出プロパティを定義するために使用
  * @requires defineEmits - Vueコンポーネントのイベントを定義するために使用
+ * @requires getCurrentInstance - Vueコンポーネントのインスタンスを取得するために使用
+ * @requires onMounted - Vueコンポーネントがマウントされた後に実行する処理を定義するために使用
  * @requires ref - リアクティブなデータ参照を作成するために使用
  * @requires ScheduleBooker - 店舗予約フォームを表示するためのVueコンポーネント
  */
 import { Head } from '@inertiajs/inertia-vue3';
-import { defineEmits, getCurrentInstance, onMounted, ref } from 'vue';
+import { computed, defineEmits, getCurrentInstance, onMounted, ref } from 'vue';
 import ScheduleBooker from '@/Views/ScheduleBooker.vue';
 
 /**
@@ -71,6 +74,24 @@ function emitBackEvent() {
 function emitToggleLike(restaurant) {
     emit('toggleLike', restaurant);
 }
+
+/**
+ * Googleマップの埋め込みURLを生成するcomputedプロパティ。
+ * 店舗の住所を基に、Googleマップの埋め込み用URLを返す。
+ * 環境変数からGoogle Maps APIキーを取得し、URLに組み込む。
+ *
+ * @returns {string} Googleマップの埋め込み用URL
+ */
+const googleMapUrl = computed(() => {
+    // Googleマップの基本URL
+    const baseMapUrl = 'https://www.google.com/maps/embed/v1/place';
+    // 環境変数からAPIキーを取得
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    // レストランの住所をURLエンコード
+    const address = encodeURIComponent(props.restaurant.address);
+    // 完成したURLを返す
+    return `${baseMapUrl}?key=${apiKey}&q=${address}`;
+});
 </script>
 
 <template>
@@ -116,14 +137,15 @@ function emitToggleLike(restaurant) {
                     </div>
                 </div>
                 <div class="lg:w-1/2 w-full lg:h-auto h-64 bg-gray-300 rounded-lg  relative">
-                    <iframe width="100%" height="100%" class="absolute inset-0" frameborder="0" title="map" marginheight="0" marginwidth="0" scrolling="no" src="https://maps.google.com/maps?width=100%&height=600&hl=en&q=%C4%B0zmir+(My%20Business%20Name)&ie=UTF8&t=&z=14&iwloc=B&output=embed" style="filter: grayscale(1) contrast(1.2) opacity(0.4);"></iframe>
+                    <!-- <iframe width="100%" height="100%" class="absolute inset-0" frameborder="0" title="map" marginheight="0" marginwidth="0" scrolling="no" src="https://maps.google.com/maps?width=100%&height=600&hl=en&q=%C4%B0zmir+(My%20Business%20Name)&ie=UTF8&t=&z=14&iwloc=B&output=embed" style="filter: grayscale(1) contrast(1.2) opacity(0.4);"></iframe> -->
+                    <iframe width="100%" height="100%" class="absolute inset-0" frameborder="0" title="map" marginheight="0" marginwidth="0" scrolling="no" :src="googleMapUrl"></iframe>
                 </div>
             </div>
         </div>
         <div class="container px-5 py-5 mx-auto">
             <div data-hs-carousel='{
-                    "loadingClasses": "opacity-0"
-                    }' class="relative">
+                        "loadingClasses": "opacity-0"
+                        }' class="relative">
                 <div class="hs-carousel relative overflow-hidden w-full min-h-[350px] bg-white rounded-lg">
                     <div class="hs-carousel-body absolute top-0 bottom-0 start-0 flex flex-nowrap transition-transform duration-700 opacity-0">
                         <div class="hs-carousel-slide">
