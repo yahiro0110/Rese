@@ -1,11 +1,6 @@
 <script setup>
 /**
- * @requires useForm - Inertia.jsのフォームハンドリング機能を提供し、フォームの状態管理や送信時の処理を容易にする
- * @requires computed - Vueコンポーネントの算出プロパティを定義するために使用
  * @requires defineEmits - Vueコンポーネントのイベントを定義するために使用
- * @requires onMounted - Vueコンポーネントがマウントされた後に実行する処理を定義するために使用
- * @requires ref - リアクティブなデータ参照を作成するために使用
- * @requires InputError - フォーム入力エラーを表示するためのコンポーネント
  */
 import { defineEmits } from 'vue';
 
@@ -47,16 +42,23 @@ const closeModal = () => {
 
 <template>
     <section id="overlay" class="text-gray-600 body-font relative">
-        <div id="content" class="container px-5 py-24">
+        <div id="content" class="animate-flip-in-diag-1-bl container px-4 py-24">
             <p class="text-right"><button @click='closeModal'>close</button></p>
-            <div class="container px-5 py-8 mx-auto">
+            <div class="container px-4 py-8 mx-auto w-full">
                 <!-- 予約一覧 -->
-                <div class="lg:w-2/3 w-full mx-auto overflow-auto">
+                <div class="w-full mx-auto overflow-auto px-4">
                     <h2 class="text-gray-900 text-lg mb-5 font-medium title-font">{{ restaurantName }}の予約状況</h2>
-                    <table class="table-auto w-full text-left whitespace-no-wrap">
+                    <div v-show="schedules.length === 0">
+                        <div class="bg-orange-100 border-t border-b border-orange-500 text-orange-700 px-4 py-3" role="alert">
+                            <p class="font-bold">Not found...</p>
+                            <p class="text-sm">予約情報はありません。</p>
+                        </div>
+                    </div>
+                    <table class="table-auto w-full text-left whitespace-no-wrap" v-show="schedules.length > 0">
                         <thead>
                             <tr>
                                 <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">お名前</th>
+                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">ご連絡先</th>
                                 <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">日付</th>
                                 <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">時間</th>
                                 <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">人数</th>
@@ -65,6 +67,7 @@ const closeModal = () => {
                         <tbody>
                             <tr v-for="schedule in schedules" :key="schedule.id">
                                 <td class="px-4 border-b-2 border-gray-200 py-3">{{ schedule.user.name }}</td>
+                                <td class="px-4 border-b-2 border-gray-200 py-3">{{ schedule.user.email }}</td>
                                 <td class="px-4 border-b-2 border-gray-200 py-3">{{ schedule.date }}</td>
                                 <td class="px-4 border-b-2 border-gray-200 py-3">{{ formatTime(schedule.time) }}</td>
                                 <td class="px-4 border-b-2 border-gray-200 py-3">{{ schedule.members }}</td>
