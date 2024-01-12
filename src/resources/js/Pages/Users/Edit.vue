@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @requires AuthenticatedLayout - 認証済みユーザ用のレイアウトコンポーネント
+ * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
+ * @requires reactive - Vueコンポーネント内でリアクティブなデータを管理するために使用
+ * @requires Inertia - @inertiajs/inertiaパッケージからインポート。SPA(Single Page Application)のような体験を提供するための
+ *                     クライアントサイドのページ遷移やサーバーとのデータ送受信を行うライブラリの主要オブジェクト
+ * @requires InputError - フォーム入力エラーを表示するためのコンポーネント
+ * @requires getRoleDisplayName - ユーザの権限を表す文字列を日本語に変換する関数
+ */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
 import { reactive } from 'vue';
@@ -6,22 +15,50 @@ import { Inertia } from '@inertiajs/inertia';
 import InputError from '@/Components/InputError.vue';
 import { getRoleDisplayName } from '@/Commons/disprayRoleName.js';
 
+/**
+ * コンポーネントのプロパティ定義。
+ *
+ * @property {Object} errors - バリデーションエラー情報を含むオブジェクト。各フィールドに対するエラーが配列で格納される。
+ * @property {Object} users - ユーザ情報を含むオブジェクト。各ユーザは一意のID、名前、メールアドレスなどの情報を持つ。
+ * @property {Array} roles - 利用可能なユーザロールの配列。各ロールは一意の名前と説明を持つ。
+ */
 const props = defineProps({
     errors: Object,
     user: Object,
     roles: Array,
 });
 
+/**
+ * ユーザ編集フォームのデータモデル。
+ * このオブジェクトはVueのreactive機能を用いてリアクティブな状態を管理する。
+ *
+ * @type {Object} form - ユーザの編集に必要なデータを保持するフォームオブジェクト。
+ * @property {number} id - ユーザの一意の識別子
+ * @property {string} name - ユーザの名前
+ * @property {string} email - ユーザのメールアドレス
+ * @property {Object} roles - ユーザの権限情報を保持するオブジェクト。各権限はIDとその権限がユーザに割り当てられているかの真偽値で構成される。
+ */
 const form = reactive({
     id: props.user.id,
     name: props.user.name,
     email: props.user.email,
     roles: props.roles.reduce((obj, role) => {
+        // 現在のロール（role）のIDをキーとして、objオブジェクトにプロパティを追加する。
+        // このプロパティの値は、ユーザーがそのロールを持っているかどうかの真偽値。
+        // `props.user.roles.some(...)` は、ユーザーのロールの中に現在のロールのIDが存在するかをチェックし、
+        // 存在する場合はtrue、存在しない場合はfalseを返す。
         obj[role.id] = props.user.roles.some(userRole => userRole.id === role.id);
         return obj;
     }, {}),
 });
 
+/**
+ * 指定されたユーザーIDに基づいてユーザー情報を更新する関数。
+ * Inertia.jsのputメソッドを使用して、サーバーにHTTP PUTリクエストを送信する。
+ * この関数は、主にユーザーの編集フォームから呼び出される。
+ *
+ * @param {number} id - 更新するユーザーの一意の識別子（ID）
+ */
 const updateUser = (id) => {
     Inertia.put(route('users.update', { user: id }), form);
 };

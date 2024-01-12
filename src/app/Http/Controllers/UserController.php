@@ -35,7 +35,7 @@ class UserController extends Controller
             [
                 'users' => $users,
                 'roles' => Role::select('id', 'name')->get(),
-                'message' => [
+                'searchInfo' => [
                     'searchKey' => session('searchKey', ''),
                     'selectedRoles' => session('selectedRoles', []),
                     'resultCount' => $users->total(),
@@ -45,14 +45,14 @@ class UserController extends Controller
     }
 
     /**
-     * リクエストに基づいて検索セッションを更新します。
+     * リクエストに基づいて検索セッションを更新する。
      *
-     * リクエストに 'search' または 'roles' パラメータが含まれている場合、これらの値をセッションに保存します。
-     * もしリクエストにこれらのパラメータが含まれていない場合は、以前のセッション値をリクエストにマージします。
-     * これにより、ユーザーの検索状態を維持します。
+     * リクエストに 'search' または 'roles' パラメータが含まれている場合、これらの値をセッションに保存する。
+     * もしリクエストにこれらのパラメータが含まれていない場合は、以前のセッション値をリクエストにマージする。
+     * これにより、ユーザーの検索状態を維持される。
      *
-     * @param Request $request ユーザーからのリクエスト。
-     * @return void このメソッドは戻り値を持ちません。
+     * @param Request $request ユーザーからのリクエスト
+     * @return void このメソッドは戻り値を持ちません
      */
     private function updateSearchSession(Request $request)
     {

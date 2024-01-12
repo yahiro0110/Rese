@@ -48,10 +48,10 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * ユーザーに関連する役割のコレクションを取得します。
+     * ユーザーに関連する役割のコレクションを取得する。
      *
-     * このメソッドは多対多のリレーションシップを表し、関連するRoleモデルのインスタンスのコレクションを返します。
-     * ユーザーと役割は `role_user` 中間テーブルを介して関連付けられています。
+     * このメソッドは多対多のリレーションシップを表し、関連するRoleモデルのインスタンスのコレクションを返す。
+     * ユーザーと役割は `role_user` 中間テーブルを介して関連付けられる。
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
@@ -61,10 +61,10 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * ユーザーに関連する店舗のコレクションを取得します。
+     * ユーザーに関連する店舗のコレクションを取得する。
      *
-     * このメソッドは多対多のリレーションシップを表し、関連するRestaurantモデルのインスタンスのコレクションを返します。
-     * ユーザーと店舗は `restaurant_user` 中間テーブルを介して関連付けられています。
+     * このメソッドは多対多のリレーションシップを表し、関連するRestaurantモデルのインスタンスのコレクションを返す。
+     * ユーザーと店舗は `restaurant_user` 中間テーブルを介して関連付けられる。
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
@@ -93,8 +93,8 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * ユーザーのクエリにロールのIDと名前のみを含めるローカルスコープ。
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス。
-     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス。
+     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス
+     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス
      */
     public function scopeWithRolesOnlyIdAndName($query)
     {
@@ -106,9 +106,9 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * 検索キーワードに基づいてユーザーをフィルタリングするローカルスコープ。
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス。
-     * @param string|null $input 検索キーワード。
-     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス。
+     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス
+     * @param string|null $input 検索キーワード
+     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス
      */
     public function scopeSearchKey($query, $input = null)
     {
@@ -126,9 +126,9 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * ロールによるフィルタリングを適用するローカルスコープ。
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス。
-     * @param array|string $roles フィルタリングに使用するロール。
-     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス。
+     * @param \Illuminate\Database\Eloquent\Builder $query Eloquentのクエリビルダーインスタンス
+     * @param array|string $roles フィルタリングに使用するロール
+     * @return \Illuminate\Database\Eloquent\Builder 更新されたクエリビルダーインスタンス
      */
     public function scopeWithRoles($query, $roles)
     {
@@ -151,8 +151,8 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * 検索キーワードとロールに基づいてユーザーを検索しフィルタリングするメソッド。
      *
-     * @param \Illuminate\Http\Request $request リクエストデータ。
-     * @return \Illuminate\Pagination\LengthAwarePaginator ページネーションされたユーザーのコレクション。
+     * @param \Illuminate\Http\Request $request リクエストデータ
+     * @return \Illuminate\Pagination\LengthAwarePaginator ページネーションされたユーザーのコレクション
      */
     public static function searchAndFilter($request)
     {

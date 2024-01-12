@@ -1,15 +1,34 @@
 <script setup>
+/**
+ * @requires AuthenticatedLayout - 認証済みユーザ用のレイアウトコンポーネント
+ * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
+ * @requires Link - Inertia.jsのリンクコンポーネント
+ * @requires Inertia - @inertiajs/inertiaパッケージからインポート。SPA(Single Page Application)のような体験を提供するための
+ *                   クライアントサイドのページ遷移やサーバーとのデータ送受信を行うライブラリの主要オブジェクト
+ * @requires FlashMessage - フラッシュメッセージ表示コンポーネント
+ * @requires getRoleDisplayName - ユーザの権限を表す文字列を日本語に変換する関数
+ */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
-// import { nl2br } from '@/common';
 import { Inertia } from '@inertiajs/inertia';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { getRoleDisplayName } from '@/Commons/disprayRoleName.js';
 
+/**
+ * コンポーネントのプロパティ定義。
+ *
+ * @property {Object} - ユーザ情報を含むオブジェクト。各ユーザは一意のID、名前、メールアドレスなどの情報を持つ。
+ */
 const props = defineProps({
     user: Object,
 });
 
+/**
+ * 指定されたユーザーIDに基づいてユーザー情報を削除する関数。
+ * Inertia.jsのdeleteメソッドを使用して、サーバーにHTTP DELETEリクエストを送信する。
+ *
+ * @param {number} id - 削除するユーザーの一意の識別子（ID）
+ */
 const deleteUser = (id) => {
     Inertia.delete(route('users.destroy', { user: id }), {
         onBefore: () => confirm('削除しますか？'),

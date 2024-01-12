@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
                 // マネージャーには全てのロールを割り当てる
                 $user->roles()->attach($roles->pluck('id')->toArray());
             } else {
-                // スタッフにはランダムな3つのロールを割り当てる
+                // スタッフには「利用者」のロールを割り当てる
                 $user->roles()->attach($roles->find(3));
             }
         }

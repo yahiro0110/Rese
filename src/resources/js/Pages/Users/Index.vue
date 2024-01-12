@@ -1,37 +1,24 @@
 <script setup>
 /**
- * @file index.vue
- * @description ユーザ一覧ページのVueコンポーネント。認証済みユーザのみアクセス可能で、ユーザ情報の一覧表示と検索機能を提供します。
- *
- * @component
- * @requires AuthenticatedLayout: 認証済みユーザ用のレイアウトコンポーネント
- * @requires Pagination: ページネーションコンポーネント
- * @requires FlashMessage: フラッシュメッセージ表示コンポーネント
- * @requires @inertiajs/inertia-vue3: Inertia.jsのVue 3バインディング
- * @requires vue: Vue.jsフレームワーク
- * @requires @inertiajs/inertia: Inertia.jsライブラリ
- *
- * @prop {Object} users - 表示するユーザデータ
- * @prop {Array} roles - 利用可能なユーザロール
- * @prop {Object} flash - フラッシュメッセージ情報
- *
- * @data {String} search - 検索クエリ文字列
- * @data {Array} selectedRoles - 選択されたロール
- *
- * @method searchUser 検索クエリと選択されたロールに基づいてユーザを検索
- * @method searchClear 検索フィールドと選択されたロールをクリア
- *
- * @watchEffect セッションストレージとの状態同期を管理
- *
- * @template ユーザ一覧の表示、検索バー、ロール選択チェックボックス、フラッシュメッセージ、ページネーション
+ * @requires AuthenticatedLayout - 認証済みユーザ用のレイアウトコンポーネント
+ * @requires Head - Vueコンポーネント内でページのタイトルやメタデータを管理するために使用
+ * @requires Link - Inertia.jsのリンクコンポーネント
+ * @requires ref - リアクティブなデータ参照を作成するために使用
+ * @requires watchEffect - Vueコンポーネント内でリアクティブなデータを監視するために使用
+ * @requires Inertia - @inertiajs/inertiaパッケージからインポート。SPA(Single Page Application)のような体験を提供するための
+ *                   クライアントサイドのページ遷移やサーバーとのデータ送受信を行うライブラリの主要オブジェクト
+ * @requires Pagination - ページネーションコンポーネント
+ * @requires FlashMessage - フラッシュメッセージ表示コンポーネント
+ * @requires HeaderMessage - ヘッダーメッセージ表示コンポーネント
+ * @requires getRoleDisplayName - ユーザの権限を表す文字列を日本語に変換する関数
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/inertia-vue3';
+import { ref, watchEffect } from 'vue';
+import { Inertia } from '@inertiajs/inertia';
 import Pagination from '@/Components/Pagination.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import HeaderMessage from '@/Components/HeaderMessage.vue';
-import { ref, watchEffect } from 'vue';
-import { Inertia } from '@inertiajs/inertia';
 import { getRoleDisplayName } from '@/Commons/disprayRoleName.js';
 
 /**
@@ -39,34 +26,34 @@ import { getRoleDisplayName } from '@/Commons/disprayRoleName.js';
  *
  * @property {Object} users - ユーザ情報を含むオブジェクト。各ユーザは一意のID、名前、メールアドレスなどの情報を持つ。
  * @property {Array} roles - 利用可能なユーザロールの配列。各ロールは一意の名前と説明を持つ。
- * @property {Object} flash - フラッシュメッセージに関するデータ。メッセージの内容やステータス（成功、警告など）を含む。
+ * @property {Object} searchInfo - ユーザ検索用のクエリ文字列と選択されたロールおよび取得件数を保持するオブジェクト。
  */
 const props = defineProps({
     users: Object,
     roles: Array,
-    message: Object,
+    searchInfo: Object,
 });
 
 /**
  * ユーザ検索用のクエリ文字列。
- * セッションストレージから「searchKey」を取得して初期化します。値が存在しない場合は、空文字列で初期化されます。
+ * セッションストレージから「searchKey」を取得して初期化をおこない、値が存在しない場合は、空文字列で初期化される。
  * @type {Ref<String>}
  */
-const search = ref(props.message.searchKey);
+const search = ref(props.searchInfo.searchKey);
 
 /**
  * 選択されたユーザロールを追跡するリアクティブリファレンス。
- * セッションストレージから「selectedRoles」をJSONとして解析し、初期化します。値が存在しない場合は、空の配列で初期化されます。
+ * セッションストレージから「selectedRoles」をJSONとして解析し、初期化をおこない。値が存在しない場合は、空の配列で初期化される。
  * @type {Ref<Array>}
  */
-const selectedRoles = ref(props.message.selectedRoles);
+const selectedRoles = ref(props.searchInfo.selectedRoles);
 
 /**
  * Vueのリアクティブシステムを使用して、`search` と `selectedRoles` の変更を監視し、
- * これらの変更があるたびにセッションストレージを更新します。
- * - `search` は `searchKey` として文字列としてセッションストレージに保存されます。
- * - `selectedRoles` はJSON文字列に変換されてから `selectedRoles` としてセッションストレージに保存されます。
- * これにより、ページ再読み込み時にユーザの検索状態とロール選択状態を維持することができます。
+ * これらの変更があるたびにセッションストレージを更新する。
+ * - `search` は `searchKey` として文字列としてセッションストレージに保存される。
+ * - `selectedRoles` はJSON文字列に変換されてから `selectedRoles` としてセッションストレージに保存される。
+ * これにより、ページ再読み込み時にユーザの検索状態とロール選択状態を維持することができる。
  */
 watchEffect(() => {
     localStorage.setItem('searchKey', search.value);
@@ -75,9 +62,9 @@ watchEffect(() => {
 
 /**
  * 現在の検索クエリ（`search`）と選択されたロール（`selectedRoles`）に基づいてユーザを検索する関数。
- * 検索クエリとロールが両方とも空の場合は、`searchClear`関数を呼び出して検索条件をクリアします。
+ * 検索クエリとロールが両方とも空の場合は、`searchClear`関数を呼び出して検索条件をクリアする。
  * それ以外の場合は、Inertia.jsのgetメソッドを使用してサーバーに検索クエリを送信し、
- * 応答に基づいてユーザ一覧を更新します。
+ * 応答に基づいてユーザ一覧を更新する。
  *
  * @function searchUser
  */
@@ -95,8 +82,8 @@ const searchUser = () => {
 
 /**
  * 検索条件をクリアし、全ユーザを表示するための関数。
- * `search`と`selectedRoles`のリアクティブリファレンスをリセットし、Inertia.jsを使用してサーバーにリクエストを送信します。
- * これにより、フィルタリングなしでユーザ一覧が再ロードされます。
+ * `search`と`selectedRoles`のリアクティブリファレンスをリセットし、Inertia.jsを使用してサーバーにリクエストを送信する。
+ * これにより、フィルタリングなしでユーザ一覧が再ロードされる。
  *
  * @function searchClear
  */
@@ -122,7 +109,7 @@ const searchClear = () => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                         <FlashMessage />
-                        <HeaderMessage :message="message" />
+                        <HeaderMessage :message="searchInfo" />
                         <section class="text-gray-600 body-font">
                             <div class="container px-5 py-8 mx-auto">
                                 <!-- ロール選択のチェックボックス -->
