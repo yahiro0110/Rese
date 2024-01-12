@@ -4,7 +4,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\UploadController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,9 +20,6 @@ use Inertia\Inertia;
 */
 
 Route::resource('users', UserController::class)->middleware(['role:admin'], 'auth', 'verified');
-
-// TODO: 検証用で設定したルートなのであとで削除する
-Route::resource('upload', UploadController::class);
 
 Route::resource('restaurants', RestaurantController::class)->middleware(['role:manager'], 'auth', 'verified');
 Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->middleware(['role:manager'], 'auth', 'verified')->name('restaurants.formUpdate');
