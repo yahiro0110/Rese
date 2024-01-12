@@ -23,9 +23,9 @@ class RestaurantFactory extends Factory
             'postal' => $this->faker->postcode,
             'address' => $this->faker->prefecture . $this->faker->city . $this->faker->streetAddress,
             'description' => '',
-            'prefecture_id' => $this->faker->numberBetween(1, 47),
+            'prefecture_id' => '',
             'genre_id' => '',
-            'user_id' => $this->faker->numberBetween(3, 50),
+            'user_id' => 1,
         ];
     }
 }
