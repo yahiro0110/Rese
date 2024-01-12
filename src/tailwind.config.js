@@ -118,6 +118,14 @@ module.exports = {
                         opacity: "0"
                     }
                 },
+                "fade-in": {
+                    "0%": {
+                        opacity: "0"
+                    },
+                    to: {
+                        opacity: "1"
+                    }
+                },
             },
             animation: {
                 flash: "flashFade 3.0s forwards",
@@ -128,6 +136,7 @@ module.exports = {
                 "scale-in-center": "scale-in-center 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940)   both",
                 "flip-in-diag-1-bl": "flip-in-diag-1-bl 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940)   both",
                 "flip-out-diag-1-tr": "flip-out-diag-1-tr 0.45s cubic-bezier(0.550, 0.085, 0.680, 0.530)   both",
+                "fade-in": "fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000)   both",
             },
         },
     },

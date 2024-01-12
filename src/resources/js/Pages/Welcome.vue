@@ -31,7 +31,7 @@ const isMdOrLarger = computed(() => {
 <template>
     <Head title="Welcome" />
 
-    <div class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white" :class="{ 'bg-image': isMdOrLarger, 'bg-image-sm': !isMdOrLarger }">
+    <div class="animate-fade-in relative sm:flex sm:justify-center sm:items-center min-h-screen bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white" :class="{ 'bg-image': isMdOrLarger, 'bg-image-sm': !isMdOrLarger }">
         <div v-if="canLogin" class="sm:fixed sm:top-0 sm:right-0 p-6 text-right">
             <Link v-if="$page.props.auth.user" :href="route('home')" class="font-semibold text-gray-900 hover:text-white dark:text-gray-900 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-gray-500">
             Home</Link>
