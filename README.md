@@ -2,7 +2,7 @@
 
 ## Outline
 
-PHP のフレームワーク Laravel で作成された Web アプリケーション（飲食店予約サービス）です。<br />
+PHP のフレームワーク Laravel および Vue.js で作成された Web アプリケーション（飲食店予約サービス）です。<br />
 アプリケーションの詳細は Notion でまとめておりますので、[そちら](https://h-yamasita.notion.site/Rese-d233d1ed442f41aa9402e8e2fc0822af?pvs=4) をご覧ください。
 
 ## Requirement
@@ -27,7 +27,9 @@ PHP のフレームワーク Laravel で作成された Web アプリケーシ�
     cp ./src/.env.example ./src/.env
     ```
 
-3.  .env ファイル内のデータベース接続設定およびメール設定を次のように書きかえてください。
+3.  .env ファイル内のデータベース接続設定およびメール設定を次のように書きかえてください。<br />
+    なお本アプリの地図表示には Google Map API ([Maps Embed API](https://developers.google.com/maps/documentation/embed/get-started?hl=ja)) を使用しております。<br />
+    そのため、.env ファイル内の VITE_GOOGLE_MAPS_API_KEY には別途取得したキーをご記入ください。
 
     ```markdown
     DB_CONNECTION=mysql
@@ -45,6 +47,8 @@ PHP のフレームワーク Laravel で作成された Web アプリケーシ�
     MAIL_ENCRYPTION=null
     MAIL_FROM_ADDRESS="rese@example.com"
     MAIL_FROM_NAME="${APP_NAME}"
+
+    VITE_GOOGLE_MAPS_API_KEY=API キー
     ```
 
 4.  Docker コンテナを起動します。
