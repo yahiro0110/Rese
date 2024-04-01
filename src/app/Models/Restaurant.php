@@ -85,6 +85,19 @@ class Restaurant extends Model
         return $this->belongsToMany(User::class, 'restaurant_user');
     }
 
+    /**
+     * 店舗に関連するレビュー情報を取得する。
+     *
+     * このメソッドは一対多のリレーションシップを表し、関連するReviewモデルのインスタンスのコレクションを返す。
+     * 店舗は `reviews` テーブルを介して予約情報と関連付けられる。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     // --------------------------------------------------------------------------------
     // クエリスコープとカスタムメソッド
     // --------------------------------------------------------------------------------
