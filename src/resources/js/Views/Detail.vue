@@ -8,9 +8,10 @@
  * @requires ref - リアクティブなデータ参照を作成するために使用
  * @requires ScheduleBooker - 店舗予約フォームを表示するためのVueコンポーネント
  */
-import { Head } from '@inertiajs/inertia-vue3';
+import { Head, useForm } from '@inertiajs/inertia-vue3';
 import { computed, defineEmits, getCurrentInstance, onMounted, ref } from 'vue';
 import ScheduleBooker from '@/Views/ScheduleBooker.vue';
+import ReviewForm from '@/Views/ReviewForm.vue';
 
 /**
  * preline UIを使用するための初期化処理。
@@ -92,11 +93,26 @@ const googleMapUrl = computed(() => {
     // 完成したURLを返す
     return `${baseMapUrl}?key=${apiKey}&q=${address}`;
 });
+
+/**
+ * 口コミ入力フォームの表示状態を管理するリアクティブなプロパティ。
+ *
+ * @type {boolean} inputReviewForm - 口コミ入力フォームの表示状態
+ */
+const inputReviewForm = ref(false);
+
+/**
+ * 口コミ入力フォームを表示する関数。
+ */
+const openInputReviewForm = () => inputReviewForm.value = true;
+const closeInputReviewForm = () => inputReviewForm.value = false;
 </script>
 
 <template>
+
     <Head title="詳細" />
     <ScheduleBooker v-if="showContent" v-bind="{ restaurantId: restaurant.id, schedule: null, errors }" @closeModal="closeModal" />
+    <ReviewForm v-if="inputReviewForm" v-bind="{ restaurantId: restaurant.id, reviewId: null, errors }" @closeModal="closeInputReviewForm" />
     <section class="text-gray-600 body-font overflow-hidden animate-scale-in-hor-left">
         <div class="container px-5 py-24 mx-auto">
             <div class="text-center md:text-left md:px-10 md:pb-5">
@@ -129,6 +145,7 @@ const googleMapUrl = computed(() => {
                     </div>
                     <div class="flex">
                         <button @click="openModal" class="flex ml-auto text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">予約する</button>
+                        <button @click="openInputReviewForm" class="flex ml-4 text-white bg-orange-500 border-0 py-2 px-6 focus:outline-none hover:bg-orange-600 rounded">評価する</button>
                         <button @click="emitToggleLike(restaurant)" class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4" :class="{ 'bg-red-100': restaurant.liked }">
                             <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5" viewBox="0 0 24 24" :class="{ 'text-red-500': restaurant.liked }">
                                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path>

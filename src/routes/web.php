@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
@@ -27,6 +28,8 @@ Route::post('restaurants/{restaurant}/attach', [RestaurantController::class, 'at
 Route::delete('restaurants/{restaurant}/detach', [RestaurantController::class, 'detachFavorite'])->middleware('auth', 'verified')->name('restaurants.detach');
 
 Route::resource('schedules', ScheduleController::class)->middleware('auth', 'verified');
+
+Route::resource('reviews', ReviewController::class)->middleware('auth', 'verified');
 
 Route::get('caution/{role}', function ($role) {
     return Inertia::render('Caution', [

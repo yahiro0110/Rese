@@ -184,7 +184,16 @@ const clearSelectedRestaurant = () => {
     // アニメーションをトリガー
     containerAnimation.value = true;
     // 1000ミリ秒後にアニメーションをリセット
-    setTimeout(() => containerAnimation.value = false, 1000);
+    setTimeout(() => {
+        containerAnimation.value = false;
+        // Inertia.jsを使用して、フラッシュメッセージをリセットするための新しいリクエストを送信
+        Inertia.visit(window.location.pathname, {
+            method: 'get',
+            preserveState: true, // 状態を維持
+            preserveScroll: true, // スクロール位置を維持
+            only: ['flash'], // 必要なプロパティのみを更新
+        });
+    }, 1000);
 }
 
 /**
@@ -271,6 +280,7 @@ const detachRestaurant = (restaurant) => {
 </script>
 
 <template>
+
     <Head title="Home" />
 
     <AuthenticatedLayout>
