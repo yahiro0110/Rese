@@ -8,7 +8,7 @@
  * @requires ref - リアクティブなデータ参照を作成するために使用
  * @requires ScheduleBooker - 店舗予約フォームを表示するためのVueコンポーネント
  */
-import { Head, useForm } from '@inertiajs/inertia-vue3';
+import { Head } from '@inertiajs/inertia-vue3';
 import { computed, defineEmits, getCurrentInstance, onMounted, ref } from 'vue';
 import ScheduleBooker from '@/Views/ScheduleBooker.vue';
 import ReviewForm from '@/Views/ReviewForm.vue';
@@ -33,6 +33,42 @@ const props = defineProps({
     errors: Object,
     restaurant: Object
 });
+
+/**
+ * 選択された店舗の情報を含むオブジェクト内のreviewsから特定のフィールドを抽出する算出プロパティ。
+ */
+const extractedReviews = computed(() => {
+    return props.restaurant.reviews.map(review => ({
+        reviewId: review.id,
+        rating: review.rating,
+        title: review.title,
+        comment: review.comment,
+        imageUrl: review.review_images[0]?.image_path ? '/storage/images/review/' + review.review_images[0].image_path : null,
+        userId: review.user.id,
+        userName: review.user.name,
+        createdAt: formatDate(review.created_at),
+    }));
+});
+
+/**
+ * 抽出した口コミの件数を算出するプロパティ。
+ */
+const reviewCount = computed(() => extractedReviews.value.length);
+
+/**
+ * 管理者ユーザのID。
+ */
+const adminId = 1;
+
+/**
+ * 日付をYYYY-MM-DD形式に変換する関数。
+ * @param {string} dateString - 変換する日付の文字列
+ * @returns {string} 変換後の日付文字列
+ */
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+}
 
 /**
  * イベントを発火させるためのemit関数を定義。
@@ -114,6 +150,7 @@ const closeInputReviewForm = () => inputReviewForm.value = false;
     <ScheduleBooker v-if="showContent" v-bind="{ restaurantId: restaurant.id, schedule: null, errors }" @closeModal="closeModal" />
     <ReviewForm v-if="inputReviewForm" v-bind="{ restaurantId: restaurant.id, reviewId: null, errors }" @closeModal="closeInputReviewForm" />
     <section class="text-gray-600 body-font overflow-hidden animate-scale-in-hor-left">
+
         <div class="container px-5 py-24 mx-auto">
             <div class="text-center md:text-left md:px-10 md:pb-5">
                 <a href="#" class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0" @click="emitBackEvent">
@@ -159,6 +196,7 @@ const closeInputReviewForm = () => inputReviewForm.value = false;
                 </div>
             </div>
         </div>
+
         <div class="container px-5 py-5 mx-auto">
             <div data-hs-carousel='{
                         "loadingClasses": "opacity-0"
@@ -207,5 +245,53 @@ const closeInputReviewForm = () => inputReviewForm.value = false;
                 </div>
             </div>
         </div>
+
+        <div class="container px-5 py-24 mx-auto">
+            <h1 class="text-3xl font-medium title-font text-gray-900 mb-12 text-center">口コミ<span>({{ reviewCount }}件)</span></h1>
+            <div class="flex flex-wrap -m-4">
+                <div class="p-4 md:w-1/2 w-full" v-for="review in extractedReviews" :key="review.reviewId">
+                    <div class="h-full bg-gray-100 p-8 rounded">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="block w-5 h-5 text-gray-400 mb-4" viewBox="0 0 975.036 975.036">
+                            <path d="M925.036 57.197h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.399 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l36 76c11.6 24.399 40.3 35.1 65.1 24.399 66.2-28.6 122.101-64.8 167.7-108.8 55.601-53.7 93.7-114.3 114.3-181.9 20.601-67.6 30.9-159.8 30.9-276.8v-239c0-27.599-22.401-50-50-50zM106.036 913.497c65.4-28.5 121-64.699 166.9-108.6 56.1-53.7 94.4-114.1 115-181.2 20.6-67.1 30.899-159.6 30.899-277.5v-239c0-27.6-22.399-50-50-50h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.4 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l35.9 75.8c11.601 24.399 40.501 35.2 65.301 24.399z"></path>
+                        </svg>
+
+                        <h2 class="text-lg text-gray-900 font-medium title-font mb-2">{{ review.title }}</h2>
+
+                        <!-- Rating -->
+                        <div class="flex items-center mb-2">
+                            <!-- 星を動的に表示 -->
+                            <template v-for="star in 5">
+                                <svg v-if="star <= review.rating" class="flex-shrink-0 size-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                                </svg>
+                                <svg v-else class="flex-shrink-0 size-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                                </svg>
+                            </template>
+                        </div>
+                        <!-- End Rating -->
+
+                        <p class="leading-relaxed mb-6 whitespace-pre-line">{{ review.comment }}</p>
+
+                        <img alt="review image" v-if="review.imageUrl !== null" :src="review.imageUrl" class="rounded-md h-80 object-cover object-center">
+
+                        <a class="inline-flex items-center mt-4 mb-4">
+                            <img alt="testimonial" src="/images/avatar.svg" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
+                            <span class="flex-grow flex flex-col pl-4">
+                                <span class="title-font font-medium text-gray-900">{{ review.userName }}</span>
+                                <span class="text-gray-500 text-sm">{{ review.createdAt }}</span>
+                            </span>
+                        </a>
+
+                        <div class="mt-1 text-right">
+                            <button v-show="review.userId === $page.props.auth.user.id" @click="openModal" class="ml-auto mr-2 text-white text-sm bg-orange-500 border-0 p-2 focus:outline-none hover:bg-orange-600 rounded">編集</button>
+                            <button v-show="(review.userId === $page.props.auth.user.id) || ($page.props.auth.user.id === adminId)" @click="openInputReviewForm" class="text-white text-sm bg-red-500 border-0 p-2 focus:outline-none hover:bg-red-600 rounded">削除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </section>
 </template>

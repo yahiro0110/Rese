@@ -24,7 +24,7 @@ class RestaurantController extends Controller
         $userId = Auth::id();
         // 全ての店舗情報を取得し、
         // 各店舗に対して、現在のユーザーと紐づいているかどうかの情報も取得
-        $restaurants = Restaurant::with('genre', 'prefecture')
+        $restaurants = Restaurant::with('genre', 'prefecture', 'reviews.reviewImages', 'reviews.user')
             ->withUserAttached($userId)
             ->get();
         return Inertia::render(
