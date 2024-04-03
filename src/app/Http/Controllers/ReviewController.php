@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreReviewRequest;
+use App\Http\Requests\UpdateReviewRequest;
 use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +38,7 @@ class ReviewController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreReviewRequest $request)
     {
         // リクエストされたユーザーIDと店舗IDが既にレビューテーブルに存在するかをチェック
         $exists = Review::where('user_id', Auth::id())
@@ -79,6 +81,7 @@ class ReviewController extends Controller
                 'status' => 'success',
             ]);
         } catch (\Exception $e) {
+            // ddd($e->getMessage());
             return back()->with([
                 'message' => '口コミの投稿に失敗しました。',
                 'status' => 'error',
@@ -112,10 +115,10 @@ class ReviewController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Review $review)
+    public function update(UpdateReviewRequest $request, Review $review)
     {
         $reviewImages = $review->reviewImages;
         $file_name = $reviewImages->first()->image_path ?? null;
@@ -159,7 +162,7 @@ class ReviewController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Review  $review
      * @return \Illuminate\Http\Response
      */
     public function destroy(Review $review)
@@ -172,7 +175,8 @@ class ReviewController extends Controller
                 'status' => 'danger',
             ]);
         } catch (\Exception $e) {
-            return to_route('home')->with([
+            // ddd($e->getMessage());
+            return back()->with([
                 'message' => '口コミの削除に失敗しました。',
                 'status' => 'warning',
             ]);

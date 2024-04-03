@@ -56,7 +56,7 @@ const closeModal = () => {
 const form = ref(useForm({
     review_id: props.reviewInfo?.reviewId ?? null,
     restaurant_id: props.restaurantId,
-    rating: props.reviewInfo?.rating ?? null,
+    rating: props.reviewInfo?.rating ?? 0,
     title: props.reviewInfo?.title ?? null,
     comment: props.reviewInfo?.comment ?? null,
     imageUrl: props.reviewInfo?.imageUrl ?? null,
@@ -182,9 +182,7 @@ const updateReview = (id) => {
                         </div>
                         <!-- End Rating -->
 
-                        <InputError class="-mt-4" :message="form.errors.title" />
-
-                        <InputError v-show="form.title?.length > maxTitleLength" :message="'タイトルは' + maxTitleLength + '文字までです'" :class="{ '-mt-4': !(form.errors.title), 'mt-2': form.errors.title }" />
+                        <InputError class="-mt-3 mb-1.5" :message="form.errors.rating" />
                     </div>
 
                     <div>
@@ -194,9 +192,9 @@ const updateReview = (id) => {
 
                         <p class="mt-1 text-sm text-right" :class="{ 'text-gray-500': form.title?.length <= maxTitleLength, 'text-red-500': form.title?.length > maxTitleLength }">{{ form.title?.length ?? 0 }} / {{ maxTitleLength }}</p>
 
-                        <InputError class="-mt-4" :message="form.errors.title" />
+                        <InputError class="-mt-4 mb-1" :message="form.errors.title" />
 
-                        <InputError v-show="form.title?.length > maxTitleLength" :message="'タイトルは' + maxTitleLength + '文字までです'" :class="{ '-mt-4': !(form.errors.title), 'mt-2': form.errors.title }" />
+                        <InputError class="mb-1" v-show="form.title?.length > maxTitleLength" :message="'タイトルは' + maxTitleLength + '文字までです'" :class="{ '-mt-4': !(form.errors.title), 'mt-2': form.errors.title }" />
                     </div>
 
                     <div>
@@ -206,9 +204,9 @@ const updateReview = (id) => {
 
                         <p class="mt-1 text-sm text-right" :class="{ 'text-gray-500': form.comment?.length <= maxCommentLength, 'text-red-500': form.comment?.length > maxCommentLength }">{{ form.comment?.length ?? 0 }} / {{ maxCommentLength }}</p>
 
-                        <InputError class="-mt-4" :message="form.errors.comment" />
+                        <InputError class="-mt-4 mb-1" :message="form.errors.comment" />
 
-                        <InputError v-show="form.comment?.length > maxCommentLength" :message="'投稿する内容は' + maxCommentLength + '文字までです'" :class="{ '-mt-4': !(form.errors.comment), 'mt-2': form.errors.comment }" />
+                        <InputError class="mb-1" v-show="form.comment?.length > maxCommentLength" :message="'投稿できる内容は' + maxCommentLength + '文字までです'" :class="{ '-mt-4': !(form.errors.comment), 'mt-2': form.errors.comment }" />
                     </div>
 
                     <div>
@@ -220,7 +218,7 @@ const updateReview = (id) => {
 
                         <img v-if="imagePreview" :src="imagePreview" class="h-80 w-full object-cover object-center" alt="Preview image">
 
-                        <InputError class="p-1" :message="form.errors.file" />
+                        <InputError class="-mt-4" :message="form.errors.file" />
                     </div>
 
                     <button class="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg mt-10">{{ buttonName }}</button>
