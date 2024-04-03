@@ -162,8 +162,20 @@ class ReviewController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Review $review)
     {
-        //
+        try {
+            $review->delete();
+
+            return to_route('home')->with([
+                'message' => '口コミを削除しました。',
+                'status' => 'danger',
+            ]);
+        } catch (\Exception $e) {
+            return to_route('home')->with([
+                'message' => '口コミの削除に失敗しました。',
+                'status' => 'warning',
+            ]);
+        }
     }
 }

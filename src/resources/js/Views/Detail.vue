@@ -184,6 +184,18 @@ const openUpdateReviewForm = () => {
 };
 const closeInputReviewForm = () => inputReviewForm.value = false;
 const closeUpdateReviewForm = () => updateReviewForm.value = false;
+
+/**
+ * 指定された口コミIDに基づいて口コミ情報を削除する関数。
+ * Inertia.jsのdeleteメソッドを使用して、サーバーにHTTP DELETEリクエストを送信する。
+ *
+ * @param {number} id - 削除する口コミの一意の識別子（ID）
+ */
+const deleteReview = (id) => {
+    Inertia.delete(route('reviews.destroy', { review: id }), {
+        onBefore: () => confirm('口コミを削除しますか？'),
+    });
+};
 </script>
 
 <template>
@@ -329,7 +341,7 @@ const closeUpdateReviewForm = () => updateReviewForm.value = false;
 
                         <div class="mt-1 text-right">
                             <button v-show="review.userId === $page.props.auth.user.id" @click="selectReview(review)" class="ml-auto mr-2 text-white text-sm bg-orange-500 border-0 p-2 focus:outline-none hover:bg-orange-600 rounded">編集</button>
-                            <button v-show="(review.userId === $page.props.auth.user.id) || ($page.props.auth.user.id === adminId)" @click="openInputReviewForm" class="text-white text-sm bg-red-500 border-0 p-2 focus:outline-none hover:bg-red-600 rounded">削除</button>
+                            <button v-show="(review.userId === $page.props.auth.user.id) || ($page.props.auth.user.id === adminId)" @click="deleteReview(review.reviewId)" class="text-white text-sm bg-red-500 border-0 p-2 focus:outline-none hover:bg-red-600 rounded">削除</button>
                         </div>
                     </div>
                 </div>
