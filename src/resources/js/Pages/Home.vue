@@ -177,24 +177,22 @@ const containerAnimation = ref(false);
 /**
  * 店舗選択をクリアする関数。
  * 選択された店舗情報をリセットし、関連するアニメーションをトリガーする。
+ *  Inertia.jsを使用して、最新の情報を取得するために新しいリクエストを送信する。
  * selectedRestaurantをnullに設定して選択状態をクリアし、コンテナのアニメーション状態をtrueに設定してアニメーションを開始する。
  * 1000ミリ秒（1秒）後に、アニメーション状態をfalseに戻してアニメーションを終了させる。
- * その後、Inertia.jsを使用して、フラッシュメッセージをリセットするための新しいリクエストを送信する。
  */
 const clearSelectedRestaurant = () => {
+    // Inertia.jsを使用して、フラッシュメッセージをリセットするための新しいリクエストを送信
+    Inertia.visit(window.location.pathname, {
+        method: 'get',
+        preserveScroll: true, // スクロール位置を維持
+    });
     selectedRestaurant.value = null;
     // アニメーションをトリガー
     containerAnimation.value = true;
     // 1000ミリ秒後にアニメーションをリセット
     setTimeout(() => {
         containerAnimation.value = false;
-        // Inertia.jsを使用して、フラッシュメッセージをリセットするための新しいリクエストを送信
-        Inertia.visit(window.location.pathname, {
-            method: 'get',
-            preserveState: true, // 状態を維持
-            preserveScroll: true, // スクロール位置を維持
-            only: ['flash'], // 必要なプロパティのみを更新
-        });
     }, 1000);
 }
 
@@ -327,11 +325,15 @@ watch(() => props.restaurants, (newRestaurants, oldRestaurants) => {
                         <FlashMessage />
                         <section class="text-gray-600 body-font" v-show="!selectedRestaurant" :class="{ 'animate-flash': containerAnimation }">
                             <div class="container px-5 py-4 mx-auto">
-                                <!-- search form -->
+
+                                <!-- Like restaurant check form -->
                                 <div class="flex">
                                     <input type="checkbox" v-model="favoriteOnly" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" id="hs-default-checkbox">
                                     <label for="hs-default-checkbox" class="text-sm text-gray-500 ms-3">お気に入り店舗のみを表示する</label>
                                 </div>
+                                <!-- End like restaurant check form -->
+
+                                <!-- Search form -->
                                 <div class="pb-6 sm:flex justify-end rounded-lg">
                                     <!-- Select -->
                                     <div class="relative" id="preferenceId">
@@ -354,6 +356,7 @@ watch(() => props.restaurants, (newRestaurants, oldRestaurants) => {
                                             </svg>
                                         </div>
                                     </div>
+                                    <!-- Select -->
                                     <div class="relative" id="genreId">
                                         <select data-hs-select='{
                                                 "placeholder": "カテゴリ選択...",
@@ -386,6 +389,7 @@ watch(() => props.restaurants, (newRestaurants, oldRestaurants) => {
                                     </div>
                                 </div>
                                 <!-- End search form -->
+
                                 <!-- restaurant notfound area -->
                                 <div v-show="filteredRestaurants.length === 0" class="p-8">
                                     <div class="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4" role="alert">
@@ -408,19 +412,39 @@ watch(() => props.restaurants, (newRestaurants, oldRestaurants) => {
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End restaurant notfound area -->
+
                                 <!-- restaurant index area -->
                                 <div class="flex flex-wrap -m-4">
                                     <div class="p-4 md:w-1/3" v-for="restaurant in filteredRestaurants" :key="restaurant.id">
                                         <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
+
                                             <!-- 条件付きレンダリングで画像を表示 -->
                                             <img v-if="isValidImageUrl(restaurant.restaurant_image)" class="lg:h-48 md:h-36 w-full object-cover object-center" :src="'/storage/images/' + restaurant.restaurant_image" alt="restaurant image">
                                             <!-- 画像が無効の場合は代替画像を表示 -->
                                             <img v-else class="lg:h-48 md:h-36 w-full object-cover object-center" :src="notfoundImage" alt="not found">
+
                                             <div class="p-6">
+                                                <!-- カテゴリ -->
                                                 <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">CATEGORY</h2>
                                                 <h2 class="title-font text-base font-medium text-gray-900 mb-3">{{ restaurant.genre.name }}</h2>
+                                                <!-- 店舗名 -->
                                                 <h1 class="title-font text-2xl font-mono text-gray-900 mb-3">{{ restaurant.name }}</h1>
+                                                <!-- Rating -->
+                                                <div class="flex items-center mb-2">
+                                                    <!-- 星を動的に表示 -->
+                                                    <template v-for="star in 5">
+                                                        <svg v-if="star <= restaurant.averageRating" class="flex-shrink-0 size-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                            <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                                                        </svg>
+                                                        <svg v-else class="flex-shrink-0 size-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                            <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                                                        </svg>
+                                                    </template>
+                                                </div>
+                                                <!-- 店舗説明 -->
                                                 <p class="leading-relaxed mb-3">{{ restaurant.description }}</p>
+                                                <!-- 詳細ボタン、Likeボタン -->
                                                 <div class="flex items-center flex-wrap">
                                                     <a href="#" class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0" @click="selectRestaurant(restaurant)">
                                                         詳細
@@ -438,10 +462,12 @@ watch(() => props.restaurants, (newRestaurants, oldRestaurants) => {
                                                     </span>
                                                 </div>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
                                 <!-- End restaurant index area -->
+
                             </div>
                         </section>
                         <Detail v-if="selectedRestaurant" v-bind="{ restaurant: selectedRestaurant, errors }" @back="clearSelectedRestaurant" @toggleLike="toggleLike" />

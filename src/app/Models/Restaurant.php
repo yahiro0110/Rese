@@ -98,6 +98,24 @@ class Restaurant extends Model
         return $this->hasMany(Review::class);
     }
 
+    /**
+     * 店舗の平均評価値を示す属性を追加する。
+     */
+    protected $appends = ['averageRating'];
+
+    /**
+     * 特定のレストランに対する口コミの平均評価値を取得する。
+     *
+     * @return int レビューの平均評価（端数は切り捨て）
+     */
+    public function getAverageRatingAttribute()
+    {
+        $averageRating = $this->reviews()->average('rating');
+
+        // 端数は切り捨てる
+        return (int) $averageRating;
+    }
+
     // --------------------------------------------------------------------------------
     // クエリスコープとカスタムメソッド
     // --------------------------------------------------------------------------------
