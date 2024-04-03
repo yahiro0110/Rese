@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ReviewController extends Controller
@@ -114,9 +115,45 @@ class ReviewController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Review $review)
     {
-        //
+        $reviewImages = $review->reviewImages;
+        $file_name = $reviewImages->first()->image_path ?? null;
+
+        // レビュー画像に関する更新処理
+        if ($request->file('file')) {
+            // 古いファイルが存在するか確認し、存在する場合は削除
+            if (Storage::exists('public/images/review/' . $file_name)) {
+                Storage::delete('public/images/review/' . $file_name);
+            }
+
+            // 新しいファイル名を生成し、ファイルを保存
+            $file_name = date('Ymd') . Str::random(15) . '_' . $request->file('file')->getClientOriginalName();
+            $request->file('file')->storeAs('public/images/review/', $file_name);
+
+            // Eloquentのsaveメソッドは、モデルのインスタンスに対して使用できるものであり、コレクションに対して直接使用することはできない
+            // reviewImagesはコレクションオブジェクトのため、データベースに保存するためには、firstメソッドを使用して、最初のモデルインスタンスを取得する
+            $firstReviewImage = $reviewImages->first();
+            if ($firstReviewImage) {
+                // レビュー画像が存在する場合、画像パスを更新
+                $firstReviewImage->image_path = $file_name;
+                $firstReviewImage->save();
+            } else {
+                // レビュー画像が存在しない場合、新しいレビュー画像を作成
+                $review->reviewImages()->create([
+                    'review_id' => $review->id,
+                    'image_path' => $file_name,
+                ]);
+            }
+        }
+
+        // レビュー情報に関する更新処理
+        $review->update($request->only(['rating', 'title', 'comment']));
+
+        return to_route('home')->with([
+            'message' => '口コミを更新しました。',
+            'status' => 'success',
+        ]);
     }
 
     /**

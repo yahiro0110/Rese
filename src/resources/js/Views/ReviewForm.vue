@@ -3,12 +3,13 @@
  * @requires useForm - Inertia.jsのフォームハンドリング機能を提供し、フォームの状態管理や送信時の処理を容易にする
  * @requires computed - Vueコンポーネントの算出プロパティを定義するために使用
  * @requires defineEmits - Vueコンポーネントのイベントを定義するために使用
- * @requires onMounted - Vueコンポーネントがマウントされた後に実行する処理を定義するために使用
  * @requires ref - リアクティブなデータ参照を作成するために使用
  * @requires InputError - フォーム入力エラーを表示するためのコンポーネント
+ * @requires InputLabel - フォーム入力ラベルを表示するためのコンポーネント
+ * @requires TextInput - テキスト入力フォームを表示するためのコンポーネント
  */
-import { useForm, usePage } from '@inertiajs/inertia-vue3';
-import { computed, defineEmits, onMounted, ref } from 'vue';
+import { useForm } from '@inertiajs/inertia-vue3';
+import { computed, defineEmits, ref } from 'vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
@@ -22,12 +23,13 @@ import TextInput from '@/Components/TextInput.vue';
  */
 const props = defineProps({
     errors: Object,
-    reviewId: Number,
+    reviewInfo: Object,
     restaurantId: Number,
 });
 
 /**
  * イベントを発火させるためのemit関数を定義。
+ *
  * @property {Function} closeModal モーダルウィンドウを閉じる関数
  */
 const emit = defineEmits(['closeModal']);
@@ -43,17 +45,21 @@ const closeModal = () => {
  * 口コミ入力フォームのデータモデル。
  *
  * @type {Object} form - 口コミの登録に必要なデータを保持するフォームオブジェクト
+ * @property {number} review_id - 口コミID
+ * @property {number} restaurant_id - 店舗ID
+ * @property {number} rating - 評価数
  * @property {String} title - タイトル
  * @property {String} comment - 内容
- * @property {number} restaurant_id - 店舗ID
+ * @property {String} imageUrl - レビュー画像URL
+ * @property {File} file - レビュー画像ファイル
  */
 const form = ref(useForm({
-    review_id: props.reviewId,
+    review_id: props.reviewInfo?.reviewId ?? null,
     restaurant_id: props.restaurantId,
-    rating: null,
-    title: null,
-    comment: null,
-    review_image: null,
+    rating: props.reviewInfo?.rating ?? null,
+    title: props.reviewInfo?.title ?? null,
+    comment: props.reviewInfo?.comment ?? null,
+    imageUrl: props.reviewInfo?.imageUrl ?? null,
     file: null,
 }));
 
@@ -70,7 +76,7 @@ const maxCommentLength = 400;
  *
  *  @type {string} - 店舗画像のファイルパス
  */
-let imagePreview = form.review_image ? ref('/storage/images/review' + form.review_image) : ref(null);
+let imagePreview = form.value.imageUrl ? ref(form.value.imageUrl) : ref(null);
 
 /**
  * ファイル選択時に呼び出され、画像プレビューを更新する。
@@ -87,22 +93,22 @@ const handleFileChange = (event) => {
 };
 
 /**
- * 投稿ボタンのラベルを算出する算出プロパティ。
- * reviewIdがnullであれば「投稿する」、そうでなければ「更新する」を返す。
+ * submitボタンのラベルを算出する算出プロパティ。
+ * reviewInfoがnullであれば「投稿する」、そうでなければ「更新する」を返す。
  */
 const buttonName = computed(() => {
-    return props.reviewId === null ? '投稿する' : '更新する';
+    return props.reviewInfo === null ? '投稿する' : '更新する';
 });
 
 /**
- * 口コミの「新規投稿」または「既存内容の更新」を判断して実行する関数。
- * reviewIdがnullであれば「新規投稿」、そうでなければ「既存を更新」を返す。
+ * 口コミの「新規投稿」または「既存内容の更新」を判断してリクエスト処理を実行する関数。
+ * reviewInfoがnullであれば「新規投稿」、そうでなければ「既存を更新」のリクエスト処理を返す。
  */
 const handleSubmit = () => {
-    if (props.reviewId === null) {
+    if (props.reviewInfo === null) {
         storeReview();
     } else {
-        updateReview(props.reviewId);
+        updateReview(props.reviewInfo.reviewId);
     }
 };
 
@@ -119,11 +125,11 @@ const storeReview = () => {
 
 /**
  * 既存の口コミ情報を更新する関数。
- * フォームデータを指定したエンドポイントにPUTリクエストとして送信し、
+ * フォームデータを指定したエンドポイントにPOSTリクエストとして送信し、
  * 成功した場合にモーダルウィンドウを閉じる。
  */
 const updateReview = (id) => {
-    form.value.put(route('reviews.update', { review: id }), {
+    form.value.post(route('reviews.refresh', { review: id }), {
         onSuccess: () => closeModal(),
     });
 };

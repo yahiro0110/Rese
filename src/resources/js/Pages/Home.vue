@@ -8,13 +8,14 @@
  * @requires getCurrentInstance - 現在アクティブなVueコンポーネントインスタンスを取得するために使用。setup関数内でのみ呼び出すことができる
  * @requires onMounted - Vueコンポーネントがマウントされた後に実行する処理を定義するために使用
  * @requires ref - リアクティブなデータ参照を作成するために使用
+ * @requires watch - リアクティブなデータの変更を監視するために使用
  * @requires Detail - 店舗詳細情報を表示するためのVueコンポーネント
  * @requires FlashMessage - フラッシュメッセージ表示コンポーネント
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
 import { Inertia } from '@inertiajs/inertia';
-import { computed, getCurrentInstance, onMounted, ref } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
 import Detail from '@/Views/Detail.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 
@@ -178,6 +179,7 @@ const containerAnimation = ref(false);
  * 選択された店舗情報をリセットし、関連するアニメーションをトリガーする。
  * selectedRestaurantをnullに設定して選択状態をクリアし、コンテナのアニメーション状態をtrueに設定してアニメーションを開始する。
  * 1000ミリ秒（1秒）後に、アニメーション状態をfalseに戻してアニメーションを終了させる。
+ * その後、Inertia.jsを使用して、フラッシュメッセージをリセットするための新しいリクエストを送信する。
  */
 const clearSelectedRestaurant = () => {
     selectedRestaurant.value = null;
@@ -277,6 +279,33 @@ const detachRestaurant = (restaurant) => {
         }
     );
 }
+
+/**
+ * コンポーネントに渡される `restaurants` プロパティが変更されたときに反応するウォッチャー。
+ *
+ * `restaurants` プロパティの変更を深く監視し、選択された店舗の情報があれば更新をおこなう。
+ * 選択された店舗（`selectedRestaurant`）がある場合、新しい `restaurants` リストの中からその店舗を探し、
+ * 見つかった場合は選択された店舗の情報を新しい情報に更新する。
+ *
+ * `deep: true` オプションにより、`restaurants` プロパティの中のオブジェクトのプロパティ変更も監視対象となる。
+ *
+ * 補足:
+ * Detailコンポーネントに渡される `restaurant` プロパティは、`selectedRestaurant` のリアクティブなプロパティを使用しているので、
+ * `selectedRestaurant` の更新により、Detailコンポーネントに渡される `restaurant` プロパティも更新される。
+ * これにより口コミの追加・編集や削除などの操作が行われた際に、Detailコンポーネントがリフレッシュされ、最新の情報が表示される。
+ *
+ * @param {Function} watch - Vueのウォッチャー関数
+ * @param {Object} props - コンポーネントに渡されるプロパティオブジェクト
+ * @param {Ref} selectedRestaurant - 現在選択されている店舗の情報を持つ Ref オブジェクト
+ */
+watch(() => props.restaurants, (newRestaurants, oldRestaurants) => {
+    if (selectedRestaurant.value) {
+        const updatedRestaurant = newRestaurants.find(restaurant => restaurant.id === selectedRestaurant.value.id);
+        if (updatedRestaurant) {
+            selectedRestaurant.value = updatedRestaurant;
+        }
+    }
+}, { deep: true });
 </script>
 
 <template>

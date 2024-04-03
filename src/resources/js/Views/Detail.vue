@@ -7,11 +7,14 @@
  * @requires onMounted - Vueコンポーネントがマウントされた後に実行する処理を定義するために使用
  * @requires ref - リアクティブなデータ参照を作成するために使用
  * @requires ScheduleBooker - 店舗予約フォームを表示するためのVueコンポーネント
+ * @requires ReviewForm - 口コミ入力フォームを表示するためのVueコンポーネント
+ * @requires Inertia - Inertia.jsを使用するために使用
  */
 import { Head } from '@inertiajs/inertia-vue3';
 import { computed, defineEmits, getCurrentInstance, onMounted, ref } from 'vue';
 import ScheduleBooker from '@/Views/ScheduleBooker.vue';
 import ReviewForm from '@/Views/ReviewForm.vue';
+import { Inertia } from '@inertiajs/inertia';
 
 /**
  * preline UIを使用するための初期化処理。
@@ -62,6 +65,7 @@ const adminId = 1;
 
 /**
  * 日付をYYYY-MM-DD形式に変換する関数。
+ *
  * @param {string} dateString - 変換する日付の文字列
  * @returns {string} 変換後の日付文字列
  */
@@ -72,12 +76,13 @@ function formatDate(dateString) {
 
 /**
  * イベントを発火させるためのemit関数を定義。
+ *
  * @property {Function} back - 'back'イベントを発火させる関数
  */
 const emit = defineEmits(['back', 'toggleLike']);
 
 /**
- * モーダルウィンドウの表示状態を管理するリアクティブな参照。
+ * モーダルウィンドウの表示状態を管理するリアクティブなプロパティ。
  * モーダルウィンドウが表示されている場合はtrue、そうでない場合はfalse。
  *
  * @type {ref<boolean>}
@@ -113,7 +118,7 @@ function emitToggleLike(restaurant) {
 }
 
 /**
- * Googleマップの埋め込みURLを生成するcomputedプロパティ。
+ * Googleマップの埋め込みURLを生成する算出プロパティ。
  * 店舗の住所を基に、Googleマップの埋め込み用URLを返す。
  * 環境変数からGoogle Maps APIキーを取得し、URLに組み込む。
  *
@@ -134,21 +139,59 @@ const googleMapUrl = computed(() => {
  * 口コミ入力フォームの表示状態を管理するリアクティブなプロパティ。
  *
  * @type {boolean} inputReviewForm - 口コミ入力フォームの表示状態
+ * @type {boolean} updateReviewForm - 口コミ更新フォームの表示状態
  */
 const inputReviewForm = ref(false);
+const updateReviewForm = ref(false);
 
 /**
- * 口コミ入力フォームを表示する関数。
+ * 選択されたレビューを管理するリアクティブなプロパティ。
+ *
+ * @type {ref<null|Object>}
  */
-const openInputReviewForm = () => inputReviewForm.value = true;
+const selectedReview = ref(null);
+
+/**
+ * 選択されたレビューを更新する関数。
+ *
+ * @param {Object} review - 選択されたレビュー
+ */
+const selectReview = (review) => {
+    selectedReview.value = review;
+    openUpdateReviewForm();
+};
+
+/**
+ * フラッシュメッセージをリロードする関数。
+ */
+const refreshFlashMessage = () => {
+    Inertia.reload({ only: ['flash'] });
+};
+
+/**
+ * 口コミ入力フォーム(新規・更新)を表示する関数。
+ * なお一度フラッシュメッセージが表示されたあと、再度入力フォームから投稿・更新してもメッセージが表示されないため、
+ * その対策として、入力フォームを表示する前にフラッシュメッセージをリロードする処理を実行している。
+ *
+ */
+const openInputReviewForm = () => {
+    refreshFlashMessage();
+    inputReviewForm.value = true;
+};
+const openUpdateReviewForm = () => {
+    refreshFlashMessage();
+    updateReviewForm.value = true;
+};
 const closeInputReviewForm = () => inputReviewForm.value = false;
+const closeUpdateReviewForm = () => updateReviewForm.value = false;
 </script>
 
 <template>
 
     <Head title="詳細" />
     <ScheduleBooker v-if="showContent" v-bind="{ restaurantId: restaurant.id, schedule: null, errors }" @closeModal="closeModal" />
-    <ReviewForm v-if="inputReviewForm" v-bind="{ restaurantId: restaurant.id, reviewId: null, errors }" @closeModal="closeInputReviewForm" />
+    <ReviewForm v-if="inputReviewForm" v-bind="{ restaurantId: restaurant.id, reviewInfo: null, errors }" @closeModal="closeInputReviewForm" />
+    <ReviewForm v-if="updateReviewForm" v-bind="{ restaurantId: restaurant.id, reviewInfo: selectedReview, errors }" @closeModal="closeUpdateReviewForm" />
     <section class="text-gray-600 body-font overflow-hidden animate-scale-in-hor-left">
 
         <div class="container px-5 py-24 mx-auto">
@@ -285,7 +328,7 @@ const closeInputReviewForm = () => inputReviewForm.value = false;
                         </a>
 
                         <div class="mt-1 text-right">
-                            <button v-show="review.userId === $page.props.auth.user.id" @click="openModal" class="ml-auto mr-2 text-white text-sm bg-orange-500 border-0 p-2 focus:outline-none hover:bg-orange-600 rounded">編集</button>
+                            <button v-show="review.userId === $page.props.auth.user.id" @click="selectReview(review)" class="ml-auto mr-2 text-white text-sm bg-orange-500 border-0 p-2 focus:outline-none hover:bg-orange-600 rounded">編集</button>
                             <button v-show="(review.userId === $page.props.auth.user.id) || ($page.props.auth.user.id === adminId)" @click="openInputReviewForm" class="text-white text-sm bg-red-500 border-0 p-2 focus:outline-none hover:bg-red-600 rounded">削除</button>
                         </div>
                     </div>
