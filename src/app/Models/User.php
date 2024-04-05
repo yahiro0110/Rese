@@ -83,7 +83,20 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function schedules()
     {
-        return $this->hasMany(schedule::class);
+        return $this->hasMany(Schedule::class);
+    }
+
+    /**
+     * ユーザーに関連するレビュー情報を取得する。
+     *
+     * このメソッドは一対多のリレーションシップを表し、関連するReviewモデルのインスタンスのコレクションを返す。
+     * ユーザは `reviews` テーブルを介して予約情報と関連付けられる。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 
     // --------------------------------------------------------------------------------
