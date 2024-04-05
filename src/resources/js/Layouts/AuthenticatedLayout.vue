@@ -36,7 +36,7 @@ const showingNavigationDropdown = ref(false);
                                     予約状況
                                 </NavLink>
                             </div>
-                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex" v-show="$page.props.loginUser.roles.some(role => role.name === 'manager')">
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex" v-show="$page.props.loginUser.roles.some(role => role.name === 'manager') || $page.props.loginUser.roles.some(role => role.name === 'admin')">
                                 <NavLink :href="route('restaurants.index')" :active="route().current('restaurants.index')">
                                     店舗情報
                                 </NavLink>

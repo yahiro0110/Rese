@@ -6,17 +6,17 @@
  *                    クライアントサイドのページ遷移やサーバーとのデータ送受信を行うライブラリの主要オブジェクト
  * @requires getRoleDisplayName - ユーザの権限を表す文字列を日本語に変換する関数
  */
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 import { getRoleDisplayName } from '@/Commons/disprayRoleName.js';
 
 /**
  * コンポーネントのプロパティ定義。
  *
- * @property {string} role - ユーザの権限を表す文字列
+ * @property {string} roles - ユーザの権限を表す文字列
  */
-defineProps({
-    role: String,
+const props = defineProps({
+    roles: String,
 });
 
 /**
@@ -52,6 +52,13 @@ onMounted(() => {
 const setSpaceChar = () => {
     return new Array(100).fill('&nbsp;').join('');
 };
+
+/**
+ * ユーザの権限を表す文字列を日本語に変換した結果を返す算出プロパティ。
+ */
+const displayRoles = computed(() => {
+    return props.roles.split(',').map(role => getRoleDisplayName(role)).join(', ');
+});
 </script>
 
 <template>
@@ -65,7 +72,7 @@ const setSpaceChar = () => {
                         <svg class="fill-current text-gray-500 w-3 h-3 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path d="M4 8V6a6 6 0 1 1 12 0v2h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-8c0-1.1.9-2 2-2h1zm5 6.73V17h2v-2.27a2 2 0 1 0-2 0zM7 6v2h6V6a3 3 0 0 0-6 0z" />
                         </svg>
-                        {{ getRoleDisplayName(role) }}のみアクセス可能
+                        {{ displayRoles }}のみアクセス可能
                     </p>
                     <div class="text-gray-900 font-bold text-xl mb-2">当該ページへのアクセス権限はありません</div>
                     <p class="text-gray-700 text-base">{{ countdown }}秒後にホーム画面へ戻ります<span v-html="setSpaceChar()"></span></p>
