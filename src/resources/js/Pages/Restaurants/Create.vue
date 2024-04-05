@@ -91,6 +91,65 @@ const {
 watch([() => form.address], updatePrefectureId);
 
 /**
+ * CSVファイルの内容を読み込み、formオブジェクトにセットする関数
+ */
+const handleCsvUpload = async (event) => {
+    // ファイルが選択されていない場合は処理を中断
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // formオブジェクトを初期値にリセット
+    Object.assign(form, {
+        name: null,
+        tel: null,
+        email: null,
+        postal: null,
+        address: null,
+        description: null,
+        restaurant_image: null,
+        genre_id: null,
+        prefecture_id: null,
+        file: null,
+    });
+
+    // FileReaderオブジェクトをインスタンス化
+    const reader = new FileReader();
+
+    // ファイル読み込み完了時の処理を定義
+    reader.onload = (e) => {
+        // 読み込んだCSVデータを文字列として取得
+        const csvData = e.target.result;
+        // CSVデータを改行で分割し、さらに各行をカンマで分割して2次元配列に変換
+        const lines = csvData.split('\n').map(line => line.split(','));
+        // 2行目以降が存在する場合にのみ処理を実行（ヘッダー行とみなされる1行目を含む）
+        if (lines.length > 1) {
+            // 1行目からヘッダー情報を抽出し、2行目以降をデータ行として処理
+            const headers = lines[0].map(header => header.trim().toLowerCase());
+            const values = lines[1];
+            // ヘッダーに対応する値をformオブジェクトにセット
+            headers.forEach((header, index) => {
+                const value = values[index].trim();
+                if (header === 'genre') {
+                    // ジャンル名からgenre_idを検索し、見つかればセット
+                    const genre = props.genres.find(g => g.name === value);
+                    if (genre) {
+                        form.genre_id = genre.id;
+                    } else {
+                        console.warn('該当するジャンルが見つかりません:', value);
+                    }
+                } else if (header in form) {
+                    // 対応するformオブジェクトのプロパティに値をセット
+                    form[header] = value;
+                }
+            });
+        }
+    };
+
+    // FileReaderを使ってファイルの内容をテキストとして読み込み開始
+    reader.readAsText(file);
+};
+
+/**
  * 新規にレストランを登録するための関数。
  * フォームデータを変換し、Inertia.jsのpostメソッドを使用してサーバーに送信する。
  * 特に電話番号フィールドでは、数字以外の文字をハイフンに置換する処理をおこなう。
@@ -107,6 +166,7 @@ const createRestaurant = () => {
 </script>
 
 <template>
+
     <Head title="店舗登録" />
 
     <AuthenticatedLayout>
@@ -120,6 +180,8 @@ const createRestaurant = () => {
                     <div class="p-6 text-gray-900">
                         <section class="text-gray-600 body-font relative">
                             <div class="container px-5 py-24 mx-auto flex sm:flex-nowrap flex-wrap">
+
+                                <!-- 表示プレビューエリア -->
                                 <div class="lg:w-3/4 md:w-1/2 bg-gray-100 rounded-lg sm:mr-10 p-4 md:p-10 grid-background">
                                     <p>表示プレビュー</p>
                                     <section class="text-gray-600 body-font">
@@ -156,11 +218,16 @@ const createRestaurant = () => {
                                         </div>
                                     </section>
                                 </div>
+                                <!-- end 表示プレビューエリア -->
+
+                                <!-- 店舗情報入力フォーム -->
                                 <div class="lg:w-1/2 md:w-1/2 bg-white flex flex-col md:ml-auto w-full md:py-8 mt-8 md:mt-0">
                                     <form @submit.prevent="createRestaurant">
+                                        <!-- 説明欄 -->
                                         <h2 class="text-gray-900 text-lg mb-1 font-medium title-font">店舗の情報</h2>
                                         <p class="leading-relaxed mb-5 text-sm text-gray-600">店舗の情報を登録することができます。</p>
                                         <p class="leading-relaxed mb-2 text-sm text-gray-600"><span class="text-red-500 text-lg">*</span>は入力必須です。</p>
+                                        <!-- 入力項目（ジャンル） -->
                                         <div class="relative mb-4">
                                             <label for="genre" class="leading-7 text-sm text-gray-600">ジャンル
                                                 <span class="text-red-500 text-lg">*</span>
@@ -172,6 +239,7 @@ const createRestaurant = () => {
                                                 <InputError class="p-1" :message="errors.genre_id" />
                                             </div>
                                         </div>
+                                        <!-- 入力項目（店舗名） -->
                                         <div class="relative mb-4">
                                             <label for="name" class="leading-7 text-sm text-gray-600">店舗名
                                                 <span class="text-red-500 text-lg">*</span>
@@ -179,6 +247,7 @@ const createRestaurant = () => {
                                             <input type="text" id="name" name="name" v-model="form.name" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             <InputError class="p-1" :message="errors.name" />
                                         </div>
+                                        <!-- 入力項目（電話番号） -->
                                         <div class="relative mb-4">
                                             <label for="tel" class="leading-7 text-sm text-gray-600">電話番号
                                                 <span class="text-red-500 text-lg">*</span>
@@ -186,6 +255,7 @@ const createRestaurant = () => {
                                             <input type="text" id="tel" name="tel" v-model="form.tel" @input="validatePhoneNumber" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             <InputError class="p-1" :message="errors.tel" />
                                         </div>
+                                        <!-- 入力項目（メールアドレス） -->
                                         <div class="relative mb-4">
                                             <label for="email" class="leading-7 text-sm text-gray-600">メールアドレス
                                                 <span class="text-red-500 text-lg">*</span>
@@ -193,6 +263,7 @@ const createRestaurant = () => {
                                             <input type="email" id="email" name="email" v-model="form.email" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             <InputError class="p-1" :message="errors.email" />
                                         </div>
+                                        <!-- 入力項目（郵便番号） -->
                                         <div class="relative mb-4">
                                             <label for="postal" class="leading-7 text-sm text-gray-600">郵便番号
                                                 <span class="text-red-500 text-lg">*</span>
@@ -200,6 +271,7 @@ const createRestaurant = () => {
                                             <input type="text" id="postal" name="postal" @input="validatePostal" @change="fetchAddress" v-model="form.postal" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" maxlength="7">
                                             <InputError class="p-1" :message="errors.postal" />
                                         </div>
+                                        <!-- 入力項目（住所） -->
                                         <div class="relative mb-4">
                                             <label for="address" class="leading-7 text-sm text-gray-600">住所
                                                 <span class="text-red-500 text-lg">*</span>
@@ -207,6 +279,7 @@ const createRestaurant = () => {
                                             <input type="text" id="address" name="address" v-model="form.address" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             <InputError class="p-1" :message="errors.address" />
                                         </div>
+                                        <!-- 入力項目（店舗の説明） -->
                                         <div class="relative mb-4">
                                             <label for="description" class="leading-7 text-sm text-gray-600">店舗の説明
                                                 <span class="text-red-500 text-lg">*</span>
@@ -215,15 +288,24 @@ const createRestaurant = () => {
                                             <p class="text-sm text-red-500">残りの入力可能文字数: {{ remainingCharacters }}</p>
                                             <InputError class="p-1" :message="errors.description" />
                                         </div>
+                                        <!-- 入力項目（店舗の画像） -->
                                         <div class="relative mb-4">
                                             <label for="file" class="leading-7 text-sm text-gray-600">店舗の画像</label>
                                             <input type="file" id="file" name="file" ref="file" @change="handleFileChange" @input="form.file = $event.target.files[0]" class="w-full bg-white rounded focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-sm outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             <p class="mt-1 text-sm text-red-500" id="file_input_help">PNG, JPG or JPEG (MAX. 5MB)</p>
                                             <InputError class="p-1" :message="errors.file" />
                                         </div>
+                                        <!-- CSVファイルアップロードセクションの追加 -->
+                                        <div class="relative mb-4">
+                                            <label for="csvFile" class="leading-7 text-sm text-gray-600">CSVファイル</label>
+                                            <input type="file" id="csvFile" @change="handleCsvUpload" class="w-full bg-white rounded focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-sm outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                        </div>
+                                        <!-- 登録ボタン -->
                                         <button class="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録</button>
                                     </form>
                                 </div>
+                                <!-- end 店舗情報入力フォーム -->
+
                             </div>
                         </section>
                     </div>
