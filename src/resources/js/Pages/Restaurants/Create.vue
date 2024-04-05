@@ -296,7 +296,7 @@ const createRestaurant = () => {
                                             <InputError class="p-1" :message="errors.file" />
                                         </div>
                                         <!-- CSVファイルアップロードセクションの追加 -->
-                                        <div class="relative mb-4">
+                                        <div v-if="($page.props.loginUser.roles.some(role => role.name === 'admin'))" class="relative mb-4">
                                             <label for="csvFile" class="leading-7 text-sm text-gray-600">CSVファイル</label>
                                             <input type="file" id="csvFile" @change="handleCsvUpload" class="w-full bg-white rounded focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-sm outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         </div>
