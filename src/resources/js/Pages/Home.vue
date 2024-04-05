@@ -211,16 +211,29 @@ const containerAnimation = ref(false);
 /**
  * 店舗選択をクリアする関数。
  * 選択された店舗情報をリセットし、関連するアニメーションをトリガーする。
- *  Inertia.jsを使用して、最新の情報を取得するために新しいリクエストを送信する。
+ * Inertia.reloadを使用して指定されたデータ（この場合はrestaurants）のみを更新する。
  * selectedRestaurantをnullに設定して選択状態をクリアし、コンテナのアニメーション状態をtrueに設定してアニメーションを開始する。
  * 1000ミリ秒（1秒）後に、アニメーション状態をfalseに戻してアニメーションを終了させる。
+ *
+ * 補足：
+ * Inertia.jsを使用している場合、ページ全体を再読み込みせずに特定のデータを更新する方法として、
+ * 部分的なページ更新を行うInertia.reloadメソッドがある。
  */
 const clearSelectedRestaurant = () => {
-    // Inertia.jsを使用して、フラッシュメッセージをリセットするための新しいリクエストを送信
-    Inertia.visit(window.location.pathname, {
-        method: 'get',
-        preserveScroll: true, // スクロール位置を維持
+    // Inertia.reloadを使用して、指定されたデータのみを更新
+    Inertia.reload({
+        only: ['restaurants'], // 更新したいデータのキーを指定
+        onSuccess: (page) => {
+            // サーバーからのレスポンスに基づいてreactiveRestaurantsを更新
+            if (page.props.restaurants) {
+                reactiveRestaurants.value = page.props.restaurants.map(restaurant => ({
+                    ...restaurant,
+                    liked: restaurant.user_attached === 1 ? true : false,
+                }));
+            }
+        }
     });
+    // 選択された店舗情報をリセット
     selectedRestaurant.value = null;
     // アニメーションをトリガー
     containerAnimation.value = true;
