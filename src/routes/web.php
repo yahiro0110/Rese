@@ -30,7 +30,7 @@ Route::delete('restaurants/{restaurant}/detach', [RestaurantController::class, '
 Route::resource('schedules', ScheduleController::class)->middleware('auth', 'verified');
 
 Route::resource('reviews', ReviewController::class)->middleware('auth', 'verified');
-Route::post('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.refresh')->middleware('auth', 'verified');
+Route::post('reviews/{review}', [ReviewController::class, 'update'])->name('reviews.refresh')->middleware('auth', 'verified');
 
 Route::get('caution/{roles}', function ($roles) {
     return Inertia::render('Caution', [
