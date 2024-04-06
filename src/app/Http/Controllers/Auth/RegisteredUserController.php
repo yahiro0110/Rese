@@ -45,7 +45,7 @@ class RegisteredUserController extends Controller
         ]);
 
         // ユーザーにロール「利用者」を割り当てる
-        $userDefaultRole = Role::where('name', '利用者')->first();
+        $userDefaultRole = Role::where('name', 'user')->first();
         $user->roles()->attach($userDefaultRole);
 
         event(new Registered($user));
