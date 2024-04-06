@@ -22,7 +22,7 @@ use Inertia\Inertia;
 
 Route::resource('users', UserController::class)->middleware(['role:admin'], 'auth', 'verified');
 
-Route::resource('restaurants', RestaurantController::class)->middleware(['role:manager'], 'auth', 'verified');
+Route::resource('restaurants', RestaurantController::class)->middleware(['role:admin,manager'], 'auth', 'verified');
 Route::post('restaurants/{restaurant}', [RestaurantController::class, 'update'])->middleware(['role:manager'], 'auth', 'verified')->name('restaurants.formUpdate');
 Route::post('restaurants/{restaurant}/attach', [RestaurantController::class, 'attachFavorite'])->middleware('auth', 'verified')->name('restaurants.attach');
 Route::delete('restaurants/{restaurant}/detach', [RestaurantController::class, 'detachFavorite'])->middleware('auth', 'verified')->name('restaurants.detach');
@@ -32,9 +32,9 @@ Route::resource('schedules', ScheduleController::class)->middleware('auth', 'ver
 Route::resource('reviews', ReviewController::class)->middleware('auth', 'verified');
 Route::post('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.refresh')->middleware('auth', 'verified');
 
-Route::get('caution/{role}', function ($role) {
+Route::get('caution/{roles}', function ($roles) {
     return Inertia::render('Caution', [
-        'role' => $role,
+        'roles' => $roles,
     ]);
 })->name('caution');
 
