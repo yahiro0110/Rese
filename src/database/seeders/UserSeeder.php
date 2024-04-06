@@ -20,17 +20,29 @@ class UserSeeder extends Seeder
         // 初期データの定義
         $initialUsers = [
             [
-                'name' => 'マネージャ',
+                'name' => '管理者',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('admin123'),
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => '店舗代表者',
                 'email' => 'manager@example.com',
                 'password' => Hash::make('manager123'),
                 'email_verified_at' => now(),
             ],
             [
-                'name' => 'スタッフ',
-                'email' => 'staff@example.com',
-                'password' => Hash::make('staff123'),
+                'name' => '一般ユーザーA',
+                'email' => 'usera@example.com',
+                'password' => Hash::make('usera123'),
                 'email_verified_at' => now(),
-            ]
+            ],
+            [
+                'name' => '一般ユーザーB',
+                'email' => 'userb@example.com',
+                'password' => Hash::make('userb123'),
+                'email_verified_at' => now(),
+            ],
         ];
 
         // 各初期データを挿入する
@@ -42,11 +54,14 @@ class UserSeeder extends Seeder
             // ロールデータを取得する
             $roles = Role::all();
 
-            if ($userData['name'] === 'マネージャ') {
-                // マネージャーには全てのロールを割り当てる
-                $user->roles()->attach($roles->pluck('id')->toArray());
+            if ($userData['name'] === '管理者') {
+                // 管理者には「管理者」のロールを割り当てる
+                $user->roles()->attach($roles->find(1));
+            } elseif ($userData['name'] === '店舗代表者') {
+                // マネージャーには「店舗代表者」のロールを割り当てる
+                $user->roles()->attach($roles->find(2));
             } else {
-                // スタッフには「利用者」のロールを割り当てる
+                // 一般ユーザには「利用者」のロールを割り当てる
                 $user->roles()->attach($roles->find(3));
             }
         }
