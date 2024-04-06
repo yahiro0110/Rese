@@ -217,7 +217,6 @@ const deleteReview = (id) => {
                     <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{ restaurant.name }}
                     </h1>
                     <div class="flex mb-4">お店の概要</div>
-                    <p>{{ $page.props.loginUser.roles[0].name }}</p>
                     <p class="leading-relaxed mb-4">{{ restaurant.description }}</p>
                     <div class="flex border-t border-gray-200 py-2">
                         <span class="text-gray-500">住所</span>
