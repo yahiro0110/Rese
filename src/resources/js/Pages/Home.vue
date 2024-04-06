@@ -8,13 +8,14 @@
  * @requires getCurrentInstance - 現在アクティブなVueコンポーネントインスタンスを取得するために使用。setup関数内でのみ呼び出すことができる
  * @requires onMounted - Vueコンポーネントがマウントされた後に実行する処理を定義するために使用
  * @requires ref - リアクティブなデータ参照を作成するために使用
+ * @requires watch - リアクティブなデータの変更を監視するために使用
  * @requires Detail - 店舗詳細情報を表示するためのVueコンポーネント
  * @requires FlashMessage - フラッシュメッセージ表示コンポーネント
  */
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
 import { Inertia } from '@inertiajs/inertia';
-import { computed, getCurrentInstance, onMounted, ref } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
 import Detail from '@/Views/Detail.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 
@@ -49,15 +50,17 @@ const props = defineProps({
  *
  * @type {Ref<string>} prefectureElement - 都道府県の選択値を保持するリアクティブな参照
  * @type {Ref<string>} genreElement - ジャンルの選択値を保持するリアクティブな参照
+ * @type {Ref<string>} sortingElement - ソート条件の選択値を保持するリアクティブな参照
  */
 const prefectureElement = ref('');
 const genreElement = ref('');
+const sortingElement = ref('');
 
 /**
- * 都道府県とジャンルの選択値を追跡するためのリアクティブな参照を設定し、
+ * ソート、都道府県とジャンルの選択値を追跡するためのリアクティブな参照を設定し、
  * DOM要素の変更を監視してそれに応じてフィルタキーを更新する。
  * setTimeoutを使用して３秒後にDOM要素が利用可能になるのを待ち、MutationObserverをセットアップして
- * 都道府県とジャンルの選択値が変更された場合に反応する。
+ * ソート、都道府県とジャンルの選択値が変更された場合に反応する。
  *
  * @type {Ref<string>} prefectureElement - 都道府県の選択値を保持するリアクティブな参照。
  * @type {Ref<string>} genreElement - ジャンルの選択値を保持するリアクティブな参照。
@@ -66,6 +69,7 @@ setTimeout(() => {
     // 都道府県とジャンルの選択値を保持するDOM要素への参照を設定
     prefectureElement.value = document.querySelector('div#preferenceId span.truncate');
     genreElement.value = document.querySelector('div#genreId span.truncate');
+    sortingElement.value = document.querySelector('div#sorting span.truncate');
 
     // MutationObserverのセットアップ。DOM要素の変更を監視して、フィルタキーを更新
     const observer = new MutationObserver((mutations) => {
@@ -74,12 +78,16 @@ setTimeout(() => {
                 // 変更があった際の処理
                 prefectureFilterKey.value = prefectureElement.value.textContent;
                 genreFilterKey.value = genreElement.value.textContent;
+                sortingFilterKey.value = sortingElement.value.textContent;
                 // 'なし'を選択した場合はプレースホルダーを設定
                 if (prefectureElement.value.textContent === 'なし') {
                     prefectureElement.value.textContent = 'エリア選択...';
                 }
                 if (genreElement.value.textContent === 'なし') {
                     genreElement.value.textContent = 'カテゴリ選択...';
+                }
+                if (sortingElement.value.textContent === 'なし') {
+                    sortingElement.value.textContent = '評価順...';
                 }
             }
         });
@@ -92,6 +100,9 @@ setTimeout(() => {
     if (genreElement.value) {
         observer.observe(genreElement.value, { characterData: true, childList: true });
     }
+    if (sortingElement.value) {
+        observer.observe(sortingElement.value, { characterData: true, childList: true });
+    }
 }, 3000);
 
 /**
@@ -99,11 +110,13 @@ setTimeout(() => {
  * 初期値はfalseもしくは空文字列で、ユーザーがフィルタ条件を選択すると更新される。
  *
  * @type {Ref<boolean>} favoriteOnly - お気に入りのみを表示するかどうかを保持するリアクティブな参照
+ * @type {Ref<string>} sortingFilterKey - ソート条件を保持するリアクティブな参照
  * @type {Ref<string>} prefectureFilterKey - 都道府県のフィルタ条件を保持するリアクティブな参照
  * @type {Ref<string>} genreFilterKey - ジャンルのフィルタ条件を保持するリアクティブな参照
  * @type {Ref<string>} restaurantNameFilterKey - 店舗名のフィルタ条件を保持するリアクティブな参照
  */
 const favoriteOnly = ref(false);
+const sortingFilterKey = ref('');
 const prefectureFilterKey = ref('');
 const genreFilterKey = ref('');
 const restaurantNameFilterKey = ref('');
@@ -127,15 +140,37 @@ const filterByName = (restaurants) => restaurantNameFilterKey.value ? restaurant
  * @type {Ref<Array>} - フィルタされた店舗情報の配列
  */
 const filteredRestaurants = computed(() => {
-    let filtered = reactiveRestaurants.value;
-    // フィルタ条件（お気に入り、都道府県、カテゴリ）に基づいて、店舗情報をフィルタリング
-    // もしフィルタ結果が空の場合は、早期リターンする
-    if (!(filtered = filterByFavorite(filtered)).length) return filtered;
-    if (!(filtered = filterByPrefecture(filtered)).length) return filtered;
-    if (!(filtered = filterByGenre(filtered)).length) return filtered;
-    // 店舗名のフィルタ条件に基づいて、店舗情報をフィルタリングし、フィルタ結果を返す
-    // もしフィルタ結果が空の場合は、フィルタ条件（お気に入り、都道府県、カテゴリ）でフィルタリングした結果を返す
-    return (!filterByName(filtered).length) ? filtered : filterByName(filtered);
+    // 元の配列をコピー
+    let sorted = [...reactiveRestaurants.value];
+
+    // 新しいソートロジック
+    // sortingFilterKeyに基づいてソートを実行
+    if (sortingFilterKey.value === '高い順') {
+        // 昇順ソート（averageRatingが高いものが先）
+        sorted.sort((a, b) => {
+            if (b.averageRating === 0) return -1;
+            if (a.averageRating === 0) return 1;
+            return b.averageRating - a.averageRating || b.id - a.id;
+        });
+    } else if (sortingFilterKey.value === '低い順') {
+        // 降順ソート（averageRatingが低いものが先）
+        sorted.sort((a, b) => {
+            if (b.averageRating === 0) return -1;
+            if (a.averageRating === 0) return 1;
+            return a.averageRating - b.averageRating || a.id - b.id;
+        });
+    } else if (sortingFilterKey.value === 'ランダム') {
+        // ランダムに並び替える
+        sorted.sort(() => 0.5 - Math.random());
+    }
+
+    // フィルタリング処理を適用
+    let filtered = filterByFavorite(sorted);
+    filtered = filterByPrefecture(filtered);
+    filtered = filterByGenre(filtered);
+    filtered = filterByName(filtered);
+
+    return filtered;
 });
 
 /**
@@ -176,15 +211,36 @@ const containerAnimation = ref(false);
 /**
  * 店舗選択をクリアする関数。
  * 選択された店舗情報をリセットし、関連するアニメーションをトリガーする。
+ * Inertia.reloadを使用して指定されたデータ（この場合はrestaurants）のみを更新する。
  * selectedRestaurantをnullに設定して選択状態をクリアし、コンテナのアニメーション状態をtrueに設定してアニメーションを開始する。
  * 1000ミリ秒（1秒）後に、アニメーション状態をfalseに戻してアニメーションを終了させる。
+ *
+ * 補足：
+ * Inertia.jsを使用している場合、ページ全体を再読み込みせずに特定のデータを更新する方法として、
+ * 部分的なページ更新を行うInertia.reloadメソッドがある。
  */
 const clearSelectedRestaurant = () => {
+    // Inertia.reloadを使用して、指定されたデータのみを更新
+    Inertia.reload({
+        only: ['restaurants'], // 更新したいデータのキーを指定
+        onSuccess: (page) => {
+            // サーバーからのレスポンスに基づいてreactiveRestaurantsを更新
+            if (page.props.restaurants) {
+                reactiveRestaurants.value = page.props.restaurants.map(restaurant => ({
+                    ...restaurant,
+                    liked: restaurant.user_attached === 1 ? true : false,
+                }));
+            }
+        }
+    });
+    // 選択された店舗情報をリセット
     selectedRestaurant.value = null;
     // アニメーションをトリガー
     containerAnimation.value = true;
     // 1000ミリ秒後にアニメーションをリセット
-    setTimeout(() => containerAnimation.value = false, 1000);
+    setTimeout(() => {
+        containerAnimation.value = false;
+    }, 1000);
 }
 
 /**
@@ -268,9 +324,37 @@ const detachRestaurant = (restaurant) => {
         }
     );
 }
+
+/**
+ * コンポーネントに渡される `restaurants` プロパティが変更されたときに反応するウォッチャー。
+ *
+ * `restaurants` プロパティの変更を深く監視し、選択された店舗の情報があれば更新をおこなう。
+ * 選択された店舗（`selectedRestaurant`）がある場合、新しい `restaurants` リストの中からその店舗を探し、
+ * 見つかった場合は選択された店舗の情報を新しい情報に更新する。
+ *
+ * `deep: true` オプションにより、`restaurants` プロパティの中のオブジェクトのプロパティ変更も監視対象となる。
+ *
+ * 補足:
+ * Detailコンポーネントに渡される `restaurant` プロパティは、`selectedRestaurant` のリアクティブなプロパティを使用しているので、
+ * `selectedRestaurant` の更新により、Detailコンポーネントに渡される `restaurant` プロパティも更新される。
+ * これにより口コミの追加・編集や削除などの操作が行われた際に、Detailコンポーネントがリフレッシュされ、最新の情報が表示される。
+ *
+ * @param {Function} watch - Vueのウォッチャー関数
+ * @param {Object} props - コンポーネントに渡されるプロパティオブジェクト
+ * @param {Ref} selectedRestaurant - 現在選択されている店舗の情報を持つ Ref オブジェクト
+ */
+watch(() => props.restaurants, (newRestaurants, oldRestaurants) => {
+    if (selectedRestaurant.value) {
+        const updatedRestaurant = newRestaurants.find(restaurant => restaurant.id === selectedRestaurant.value.id);
+        if (updatedRestaurant) {
+            selectedRestaurant.value = updatedRestaurant;
+        }
+    }
+}, { deep: true });
 </script>
 
 <template>
+
     <Head title="Home" />
 
     <AuthenticatedLayout>
@@ -288,12 +372,39 @@ const detachRestaurant = (restaurant) => {
                         <FlashMessage />
                         <section class="text-gray-600 body-font" v-show="!selectedRestaurant" :class="{ 'animate-flash': containerAnimation }">
                             <div class="container px-5 py-4 mx-auto">
-                                <!-- search form -->
+
+                                <!-- Like restaurant check form -->
                                 <div class="flex">
                                     <input type="checkbox" v-model="favoriteOnly" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" id="hs-default-checkbox">
                                     <label for="hs-default-checkbox" class="text-sm text-gray-500 ms-3">お気に入り店舗のみを表示する</label>
                                 </div>
+                                <!-- End like restaurant check form -->
+
+                                <!-- Search form -->
                                 <div class="pb-6 sm:flex justify-end rounded-lg">
+                                    <!-- Select -->
+                                    <div class="relative" id="sorting">
+                                        <select id="testSelect" data-hs-select='{
+                                                "placeholder": "評価順...",
+                                                "toggleTag": "<button type=\"button\"></button>",
+                                                "toggleClasses": "hs-select-disabled:pointer-events-none hs-select-disabled:opacity-50 relative py-3 px-4 pe-9 flex text-nowrap w-full cursor-pointer bg-white border border-gray-200 first:rounded-t-lg last:rounded-b-lg text-start text-sm focus:border-blue-500 focus:ring-blue-500 before:absolute before:inset-0 before:z-[1] shadow-sm",
+                                                "dropdownClasses": "mt-2 z-50 w-full max-h-[300px] p-1 space-y-0.5 bg-white border border-gray-200 rounded-lg overflow-hidden overflow-y-auto",
+                                                "optionClasses": "py-2 px-4 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg focus:outline-none focus:bg-gray-100",
+                                                "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"hidden hs-selected:block\"><svg class=\"flex-shrink-0 w-3.5 h-3.5 text-blue-600 dark:text-blue-500\" xmlns=\"http:.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"/></svg></span></div>"
+                                            }' @change="logSelection">
+                                            <option value="">choose</option>
+                                            <option>なし</option>
+                                            <option>ランダム</option>
+                                            <option>高い順</option>
+                                            <option>低い順</option>
+                                        </select>
+                                        <div class="absolute top-1/2 end-3 -translate-y-1/2">
+                                            <svg class="flex-shrink-0 w-3.5 h-3.5 text-gray-500 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="m7 15 5 5 5-5" />
+                                                <path d="m7 9 5-5 5 5" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                     <!-- Select -->
                                     <div class="relative" id="preferenceId">
                                         <select id="testSelect" data-hs-select='{
@@ -315,6 +426,7 @@ const detachRestaurant = (restaurant) => {
                                             </svg>
                                         </div>
                                     </div>
+                                    <!-- Select -->
                                     <div class="relative" id="genreId">
                                         <select data-hs-select='{
                                                 "placeholder": "カテゴリ選択...",
@@ -336,7 +448,7 @@ const detachRestaurant = (restaurant) => {
                                         </div>
                                     </div>
                                     <!-- input -->
-                                    <div class="relative max-w-xs w-full">
+                                    <div class="relative md:max-w-xs w-full">
                                         <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
                                             <svg class="flex-shrink-0 w-4 h-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <circle cx="11" cy="11" r="8" />
@@ -347,6 +459,7 @@ const detachRestaurant = (restaurant) => {
                                     </div>
                                 </div>
                                 <!-- End search form -->
+
                                 <!-- restaurant notfound area -->
                                 <div v-show="filteredRestaurants.length === 0" class="p-8">
                                     <div class="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4" role="alert">
@@ -369,19 +482,39 @@ const detachRestaurant = (restaurant) => {
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End restaurant notfound area -->
+
                                 <!-- restaurant index area -->
                                 <div class="flex flex-wrap -m-4">
                                     <div class="p-4 md:w-1/3" v-for="restaurant in filteredRestaurants" :key="restaurant.id">
                                         <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
+
                                             <!-- 条件付きレンダリングで画像を表示 -->
                                             <img v-if="isValidImageUrl(restaurant.restaurant_image)" class="lg:h-48 md:h-36 w-full object-cover object-center" :src="'/storage/images/' + restaurant.restaurant_image" alt="restaurant image">
                                             <!-- 画像が無効の場合は代替画像を表示 -->
                                             <img v-else class="lg:h-48 md:h-36 w-full object-cover object-center" :src="notfoundImage" alt="not found">
+
                                             <div class="p-6">
+                                                <!-- カテゴリ -->
                                                 <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">CATEGORY</h2>
                                                 <h2 class="title-font text-base font-medium text-gray-900 mb-3">{{ restaurant.genre.name }}</h2>
+                                                <!-- 店舗名 -->
                                                 <h1 class="title-font text-2xl font-mono text-gray-900 mb-3">{{ restaurant.name }}</h1>
+                                                <!-- Rating -->
+                                                <div class="flex items-center mb-2">
+                                                    <!-- 星を動的に表示 -->
+                                                    <template v-for="star in 5">
+                                                        <svg v-if="star <= restaurant.averageRating" class="flex-shrink-0 size-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                            <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                                                        </svg>
+                                                        <svg v-else class="flex-shrink-0 size-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                            <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                                                        </svg>
+                                                    </template>
+                                                </div>
+                                                <!-- 店舗説明 -->
                                                 <p class="leading-relaxed mb-3">{{ restaurant.description }}</p>
+                                                <!-- 詳細ボタン、Likeボタン -->
                                                 <div class="flex items-center flex-wrap">
                                                     <a href="#" class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0" @click="selectRestaurant(restaurant)">
                                                         詳細
@@ -399,10 +532,12 @@ const detachRestaurant = (restaurant) => {
                                                     </span>
                                                 </div>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
                                 <!-- End restaurant index area -->
+
                             </div>
                         </section>
                         <Detail v-if="selectedRestaurant" v-bind="{ restaurant: selectedRestaurant, errors }" @back="clearSelectedRestaurant" @toggleLike="toggleLike" />

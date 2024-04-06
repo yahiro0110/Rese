@@ -85,6 +85,37 @@ class Restaurant extends Model
         return $this->belongsToMany(User::class, 'restaurant_user');
     }
 
+    /**
+     * 店舗に関連するレビュー情報を取得する。
+     *
+     * このメソッドは一対多のリレーションシップを表し、関連するReviewモデルのインスタンスのコレクションを返す。
+     * 店舗は `reviews` テーブルを介して予約情報と関連付けられる。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * 店舗の平均評価値を示す属性を追加する。
+     */
+    protected $appends = ['averageRating'];
+
+    /**
+     * 特定のレストランに対する口コミの平均評価値を取得する。
+     *
+     * @return int レビューの平均評価（端数は切り捨て）
+     */
+    public function getAverageRatingAttribute()
+    {
+        $averageRating = $this->reviews()->average('rating');
+
+        // 端数は切り捨てる
+        return (int) $averageRating;
+    }
+
     // --------------------------------------------------------------------------------
     // クエリスコープとカスタムメソッド
     // --------------------------------------------------------------------------------

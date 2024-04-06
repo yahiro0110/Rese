@@ -16,15 +16,28 @@ class EnsureHasRole
      *
      * @param  \Illuminate\Http\Request  $request  現在のリクエストインスタンス
      * @param  \Closure  $next  次のミドルウェアへのコールバック
-     * @param  string  $role  検証するためのユーザー役割
+     * @param  mixed  ...$roles  チェックする役割
      * @return \Illuminate\Http\Response|mixed リクエストが指定された役割を持つユーザーによって行われた場合、次のミドルウェアにリクエストを渡す。
      *                                         そうでない場合は、特定のルートにリダイレクトする。
      */
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
+        // ログインしているユーザーの役割を取得
         $userRoles = Auth::user()->roles->pluck('name')->toArray();
-        if (!in_array($role, $userRoles)) {
-            return redirect()->route('caution', ['role' => $role]);
+
+        // ユーザーが指定された役割を持っているかどうかをチェック
+        $hasRole = false;
+        foreach ($roles as $role) {
+            if (in_array($role, $userRoles)) {
+                $hasRole = true;
+                break;
+            }
+        }
+
+        // すべてのロールが失敗した場合のリダイレクト、渡されたロールをクエリパラメータとして結合
+        if (!$hasRole) {
+            $rolesQuery = implode(',', $roles);
+            return redirect()->route('caution', ['roles' => $rolesQuery]);
         }
 
         return $next($request);

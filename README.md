@@ -87,12 +87,18 @@ PHP のフレームワーク Laravel および Vue.js で作成された Web ア
     http://localhost/
 
     -   ログイン用アカウントの情報(Email, Password)
-        -   マネージャ
+        -   管理者
+            -   Email: admin@example.com
+            -   Password: admin123
+        -   店舗代表者
             -   Email: manager@example.com
             -   Password: manager123
-        -   スタッフ
-            -   Email: staff@example.com
-            -   Password: staff123
+        -   一般ユーザー A
+            -   Email: usera@example.com
+            -   Password: usera123
+        -   一般ユーザー B
+            -   Email: userb@example.com
+            -   Password: userb123
 
 ## Connection
 
